@@ -1,8 +1,7 @@
 # TreeDecoding
 
-TreeDecoding - a proof if concept that tree decoding works
+This is the implementation of a underworking paper "Beam Search as Tree Parallel Decoding"
 
-TreeDecodingBSWithEos - A tree decoding beam search that handles eos tokens. But doesn't prune unused branches yet
 
-The final version is still work in progress.
-
+Todo:
+Evaluation
