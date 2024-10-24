@@ -9,6 +9,8 @@ def run_bench_mark(
     tokenizer: LlamaTokenizer,
     dataset: datasets.Dataset,
     generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int], Tuple[str, List[int]]],
+    num_beams = 10,
+    max_tokens = 500,
 ):
     # Create tqdm progress bar
     progress_bar = tqdm(
@@ -24,20 +26,19 @@ def run_bench_mark(
     for i in progress_bar:
         data = dataset[i]
         metrics = {'id': data['id'], 'time_taken': 0, 'memory_usage': []}
-        prompt = data['text']
+        prompt = data['text'][:20]
         
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
         
         start = time.time()
-        output, memory_usage = generate(model, tokenizer, prompt, 5, 600)
+        output, memory_usage = generate(model, tokenizer, prompt, num_beams, max_tokens)
         end = time.time()
         
         metrics['memory_usage'] = memory_usage
         metrics['time_taken'] = end - start
         metrics_list.append(metrics)
-        print(metrics)
-        
+
         # Update progress bar postfix with current metrics
         progress_bar.set_postfix({
             'time': f"{metrics['time_taken']:.2f}s",

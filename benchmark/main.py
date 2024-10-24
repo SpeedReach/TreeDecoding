@@ -31,4 +31,4 @@ ds = ds.map(
 )
 
 
-run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate)
+print(run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate))
