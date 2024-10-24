@@ -11,7 +11,8 @@ def origin_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tupl
     gpu_gc.collect()
     LlamaForCausalLM.clear_used_gpu()
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    outputs = model.generate(input_ids, do_sample=False, num_beams=num_beams, max_new_tokens=max_new_tokens, temperature=None, top_p = None)
+    attention_mask = torch.ones_like(input_ids)
+    outputs = model.generate(input_ids,attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_new_tokens, temperature=None, top_p = None)
 
     # Decode and print the generated output
     generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
