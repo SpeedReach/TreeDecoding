@@ -15,7 +15,7 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.float16,
     device_map="auto"
 )
-
+tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
 ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
