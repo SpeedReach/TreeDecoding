@@ -4,6 +4,8 @@ from transformers import LlamaTokenizer, cache_utils, AutoModelForCausalLM, Auto
 from transformers.cache_utils import DynamicCache
 import time
 from datasets import load_dataset
+import json
+
 
 from origin import origin_generate
 from run import run_bench_mark
@@ -33,4 +35,6 @@ ds = ds.map(
 )
 
 
-print(run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate))
+metrics = run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate)
+
+print(json.dumps(metrics))
