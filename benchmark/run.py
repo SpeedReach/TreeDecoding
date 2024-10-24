@@ -36,6 +36,7 @@ def run_bench_mark(
         metrics['memory_usage'] = memory_usage
         metrics['time_taken'] = end - start
         metrics_list.append(metrics)
+        print(metrics)
         
         # Update progress bar postfix with current metrics
         progress_bar.set_postfix({
