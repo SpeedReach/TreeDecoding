@@ -48,7 +48,7 @@ def run_bench_mark(
 
         # Update progress bar postfix with current metrics
         progress_bar.set_postfix({
-            'time': f"{metric['time_taken']:.2f}s",
+            'time': f"{metric.time_taken:.2f}s",
             'mem': f"{max(memory_usage) if memory_usage else 0:.2f}MB"
         })
     
