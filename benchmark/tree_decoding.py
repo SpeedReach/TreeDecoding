@@ -231,6 +231,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     input_len = input_ids.shape[1]
     print("input length: ", input_len)
 
+    device = model.device
+
     #generate the first 3 tokens
     outputs = model(input_ids, past_key_values=past_key_values, use_cache=True)
     past_key_values = outputs.past_key_values
@@ -379,9 +381,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
 
 def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    attention_mask = torch.ones_like(input_ids)
-    model.generate(input_ids, attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_tokens, temperature=None, top_p=None)
+    tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
 
 def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int]]:
     torch.cuda.empty_cache()
