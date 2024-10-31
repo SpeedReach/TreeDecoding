@@ -48,7 +48,7 @@ parameters = [
 tree_warmup(model, tokenizer, "This is a test", 3, 500)
 
 for parameter in parameters:
-    out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
+    out_file = open(f"out/tree/{parameter[0]}_{parameter[1]}.jsonl", "w")
     metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, parameter[0], parameter[1])
     for metric in metrics:
         out_file.write(json.dumps(metric) + "\n")
@@ -56,13 +56,13 @@ for parameter in parameters:
 exit(0)
 
 
-origin_warmup(model, tokenizer, "This is a test", 3, 500)
-
-for parameter in parameters:
-    out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(100)), origin_generate, parameter[0], parameter[1])
-
-    for metric in metrics:
-        out_file.write(json.dumps(metric) + "\n")
+#origin_warmup(model, tokenizer, "This is a test", 3, 500)
+#
+#for parameter in parameters:
+#    out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
+#    metrics = run_bench_mark(model, tokenizer, ds.select(range(100)), origin_generate, parameter[0], parameter[1])
+#
+#    for metric in metrics:
+#        out_file.write(json.dumps(metric) + "\n")
     
 
