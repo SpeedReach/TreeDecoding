@@ -18,9 +18,6 @@ logging.set_verbosity_error()
 
 
 
-def metrics_to_json(metrics: List[Metric]) -> str:
-    return json.dumps([metric.to_dict() for metric in metrics])
-
 model_name = "meta-llama/Llama-3.1-8B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
@@ -59,7 +56,7 @@ for parameter in parameters:
     out_file = open(f"out/tree/{parameter[0]}_{parameter[1]}.jsonl", "w")
     metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, parameter[0], parameter[1])
     for metric in metrics:
-        out_file.write(metrics_to_json(metric) + "\n")
+        out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 exit(0)
 
