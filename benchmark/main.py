@@ -7,21 +7,20 @@ from datasets import load_dataset
 import json
 
 
-from origin import origin_generate
+from origin import origin_generate, warmup
 from run import run_bench_mark
 from transformers import logging
 logging.set_verbosity_error()
 
-model_name = "meta-llama/Llama-3.1-8B"
+model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.float16,
     device_map="auto"
 )
+model.to("cuda")
 tokenizer.pad_token_id = tokenizer.eos_token_id
-
-origin_out = open("out/origin.jsonl", "w")
 
 
 ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
@@ -36,8 +35,24 @@ ds = ds.map(
     remove_columns=['article', 'highlights']
 )
 
+# beams / max_tokens
+parameters = [
+    (3 , 128),
+    (9, 128),
+    (15,  128),
+    (3, 1000),
+    (9 , 1000),
+    (15 , 1000)
+]
 
-metrics = run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate)
-for metric in metrics:
-    origin_out.write(json.dumps(metric) + "\n")
+
+warmup(model, tokenizer, "This is a test", 3, 500)
+
+for parameter in parameters:
+    out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
+    metrics = run_bench_mark(model, tokenizer, ds.select(range(100)), origin_generate, parameter[0], parameter[1])
+
+    for metric in metrics:
+        out_file.write(json.dumps(metric) + "\n")
     
+
