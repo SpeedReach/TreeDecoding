@@ -11,6 +11,14 @@ class Metric:
         self.time_taken = time_taken
         self.memory_usage = memory_usage
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "time_taken": self.time_taken,
+            "memory_usage": self.memory_usage
+        }
+    
+
 
 def run_bench_mark(
     model: LlamaForCausalLM,
@@ -40,7 +48,7 @@ def run_bench_mark(
         
         start = time.time()
         output, memory_usage = generate(model, tokenizer, prompt, num_beams, max_tokens)
-        print(output)
+        print(tokenizer.decode(output))
         end = time.time()
         
         metric = Metric(data['id'], end - start, memory_usage)
