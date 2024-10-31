@@ -48,7 +48,8 @@ def run_bench_mark(
         
         start = time.time()
         output, memory_usage = generate(model, tokenizer, prompt, num_beams, max_tokens)
-        print(tokenizer.decode(output))
+        for i in range(len(output[0])):
+            print(":", tokenizer.decode(output[0][i].long()))
         end = time.time()
         
         metric = Metric(data['id'], end - start, memory_usage)
