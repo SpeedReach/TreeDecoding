@@ -7,7 +7,8 @@ from datasets import load_dataset
 import json
 
 
-from origin import origin_generate, warmup
+from origin import origin_generate, origin_warmup
+from tree_decoding import tree_generate, tree_warmup
 from run import run_bench_mark
 from transformers import logging
 logging.set_verbosity_error()
@@ -19,7 +20,6 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.float16,
     device_map="auto"
 )
-model.to("cuda")
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
@@ -45,8 +45,18 @@ parameters = [
     (15 , 1000)
 ]
 
+tree_warmup(model, tokenizer, "This is a test", 3, 500)
 
-warmup(model, tokenizer, "This is a test", 3, 500)
+for parameter in parameters:
+    out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
+    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, parameter[0], parameter[1])
+    for metric in metrics:
+        out_file.write(json.dumps(metric) + "\n")
+
+exit(0)
+
+
+origin_warmup(model, tokenizer, "This is a test", 3, 500)
 
 for parameter in parameters:
     out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")

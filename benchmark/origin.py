@@ -4,7 +4,7 @@ from transformers import LlamaForCausalLM
 from typing import Tuple, List
 
 
-def warmup(model, tokenizer, prompt, num_beams, max_tokens):
+def origin_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     attention_mask = torch.ones_like(input_ids)
     model.generate(input_ids, attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_tokens, temperature=None, top_p=None)

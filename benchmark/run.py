@@ -4,6 +4,14 @@ import datasets
 import time
 from tqdm import tqdm
 
+
+class Metric:
+    def __init__(self, id: str, time_taken: float, memory_usage: List[int]):
+        self.id = id
+        self.time_taken = time_taken
+        self.memory_usage = memory_usage
+
+
 def run_bench_mark(
     model: LlamaForCausalLM,
     tokenizer: LlamaTokenizer,
@@ -11,7 +19,7 @@ def run_bench_mark(
     generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int], Tuple[str, List[int]]],
     num_beams = 10,
     max_tokens = 500,
-):
+) -> List[Metric]:
     # Create tqdm progress bar
     progress_bar = tqdm(
         range(len(dataset)),
@@ -25,7 +33,6 @@ def run_bench_mark(
     metrics_list = []
     for i in progress_bar:
         data = dataset[i]
-        metrics = {'id': data['id'], 'time_taken': 0, 'memory_usage': []}
         prompt = data['text'][:20]
         
         # Update progress bar description with current sample ID
@@ -33,15 +40,15 @@ def run_bench_mark(
         
         start = time.time()
         output, memory_usage = generate(model, tokenizer, prompt, num_beams, max_tokens)
+        print(output)
         end = time.time()
         
-        metrics['memory_usage'] = memory_usage
-        metrics['time_taken'] = end - start
-        metrics_list.append(metrics)
+        metric = Metric(data['id'], end - start, memory_usage)
+        metrics_list.append(metric)
 
         # Update progress bar postfix with current metrics
         progress_bar.set_postfix({
-            'time': f"{metrics['time_taken']:.2f}s",
+            'time': f"{metric['time_taken']:.2f}s",
             'mem': f"{max(memory_usage) if memory_usage else 0:.2f}MB"
         })
     
