@@ -21,6 +21,8 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
+origin_out = open("out/origin.jsonl", "w")
+
 
 ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
 def convert_cnn_format(d):
@@ -36,5 +38,6 @@ ds = ds.map(
 
 
 metrics = run_bench_mark(model, tokenizer, ds.select(range(10)), origin_generate)
-
-print(json.dumps(metrics))
+for metric in metrics:
+    origin_out.write(json.dumps(metric) + "\n")
+    
