@@ -165,6 +165,7 @@ from collections import deque
 
 
 def prune_kv_cache(past_key_values, input_length, remove_idx: List[int]):
+    device = past_key_values[0][0].device
     remove_idx = [i + input_length for i in remove_idx]
     #print("remove", remove_idx)
     all_indices = torch.arange(past_key_values[0][0].size(2), device = device)
