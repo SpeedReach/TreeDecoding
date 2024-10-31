@@ -12,7 +12,7 @@ from run import run_bench_mark
 from transformers import logging
 logging.set_verbosity_error()
 
-model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+model_name = "meta-llama/Llama-3.1-8B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
