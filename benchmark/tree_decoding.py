@@ -196,15 +196,15 @@ def prune_tree(searchTree: SearchTree, remove_idx: List[int]):
 def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], past_key_values):
     find_unused_start = time.time()
     unused = determine_unused_nodes(searchTree, [ node.idx for node in newest_branch])
-    print("find_unused takes", time.time() - find_unused_start)
+    #print("find_unused takes", time.time() - find_unused_start)
     #print("Unused: ", len(unused[1]), len(unused[0]) + len(unused[1]) , unused)
     prune_tree_start = time.time()
     prune_tree(searchTree, unused[1])
-    print("prune tree takes ",time.time()-prune_tree_start)
+    #print("prune tree takes ",time.time()-prune_tree_start)
 
     prune_kv_start = time.time()
     kv = prune_kv_cache(past_key_values,input_length, unused[1])
-    print("prune kv takes", time.time() - prune_kv_start)
+    #print("prune kv takes", time.time() - prune_kv_start)
     #print_tree_state(searchTree, newest_branch)
     return 
 
@@ -258,9 +258,9 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             fill_causal_mask_fast(attention_mask, searchTree, input_len, newest_branch)
             if attention_mask.shape[2] != alive_beams:
                 attention_mask = attention_mask[:,:,:alive_beams,:]
-            print("fill mask takes ", time.time()-fill_mask_start)
+            #print("fill mask takes ", time.time()-fill_mask_start)
             gc_end = time.time()
-            print(f"gc took {gc_end-gc_start}")
+            #print(f"gc took {gc_end-gc_start}")
         elif i != input_len:
             #fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
             reorder_mask_start = time.time()
@@ -269,7 +269,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
                 result[:, :, x, :] = attention_mask[:, :, next_indices[x], :]
             attention_mask = result
             fill_mask_end(attention_mask, searchTree,input_len,newest_branch.copy())
-            print("reorder mask takes ",time.time() -  reorder_mask_start)
+            #print("reorder mask takes ",time.time() -  reorder_mask_start)
         #construct position_ids
         #print("alive_beams: ", alive_beams)
         position_ids = torch.tensor([[i for _ in range(alive_beams)]], device=model.device)
@@ -281,7 +281,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         pass_start = time.time()
         outputs = model(input_ids, past_key_values=past_key_values, position_ids=position_ids, attention_mask=attention_mask, use_cache=True)
         pass_end = time.time()
-        print("One pass takes", pass_end - pass_start)
+        #print("One pass takes", pass_end - pass_start)
         past_key_values = outputs.past_key_values
         #calculate token scores
         token_scores = F.log_softmax(outputs.logits, dim=-1)
@@ -320,7 +320,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             #print(int(token_idx/beam_width)," add child")
             
             if token_id == eos_token_id:
-                print(searchNode.idx, "ended")
+                #print(searchNode.idx, "ended")
                 #need_gc = True
                 completed_nodes.append(searchNode)
                 completed_branches.append(searchNode)
