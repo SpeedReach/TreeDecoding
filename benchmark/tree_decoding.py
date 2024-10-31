@@ -3,6 +3,7 @@ import gc as gpu_gc
 from transformers import LlamaForCausalLM
 from typing import Tuple, List, Optional
 from torch import Tensor
+from transformers.cache_utils import DynamicCache
 
 from typing import List, Tuple
 import time
@@ -78,23 +79,6 @@ def determine_unused_nodes(searchTree: SearchTree, targets: List[int]) -> Tuple[
     return (all_used, all_unused)
 
 
-def generate_causal_mask(searchTree: SearchTree,input_len: int,nodes: List[SearchNode]) -> torch.Tensor:
-    branch_count = len(nodes)
-    mask = torch.full((1, 1, branch_count, searchTree.node_count + input_len), -65504, device=device, dtype=torch.float16)
-    mask[0, 0,:,:input_len] = 0
-    tmp = nodes.copy()
-    #print("========")
-    while True:
-        end = False
-        for i in range(branch_count):
-            #print(i, tmp[i].idx)
-            mask[0, 0, i, tmp[i].idx + input_len] = 0
-            if tmp[i].parent is not None:
-                tmp[i] = tmp[i].parent
-            else:
-                end = True
-        if end:
-            return mask
 
 
 def fill_causal_mask(mask: torch.Tensor, searchTree: SearchTree,input_len: int,nodes: List[SearchNode]):
@@ -228,7 +212,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
 def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int]]:
     LlamaForCausalLM.clear_used_gpu()
     gpu_usage = []
-    past_key_values = None
+    past_key_values = DynamicCache()
     input_len = input_ids.shape[1]
     print("input length: ", input_len)
 
