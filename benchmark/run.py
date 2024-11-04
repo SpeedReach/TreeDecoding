@@ -16,7 +16,8 @@ class Metric:
         return {
             "id": self.id,
             "time_taken": self.time_taken,
-            "memory_usage": self.memory_usage
+            "memory_usage": self.memory_usage,
+            "time_metric": self.time_metric
         }
     
 

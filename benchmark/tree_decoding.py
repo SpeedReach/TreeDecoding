@@ -209,7 +209,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
     return 
 
 @torch.no_grad()
-def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int]]:
+def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int], List[float]]:
     past_key_values = DynamicCache()
     input_len = input_ids.shape[1]
     print("input length: ", input_len)
@@ -366,7 +366,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
 
-def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int]]:
+def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
     torch.cuda.empty_cache()
     gpu_gc.collect()
     LlamaForCausalLM.clear()
