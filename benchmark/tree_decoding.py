@@ -361,7 +361,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         output=output.flip(dims=[0])
         outputs.append(output)
         #outputs = torch.cat((outputs, output.unsqueeze(0)))
-    return (outputs, LlamaForCausalLM.used_gpu)
+    return (outputs, LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)
 
 
 

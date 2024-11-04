@@ -6,10 +6,11 @@ from tqdm import tqdm
 
 
 class Metric:
-    def __init__(self, id: str, time_taken: float, memory_usage: List[int]):
+    def __init__(self, id: str, time_taken: float, memory_usage: List[int], time_metric: List[float]):
         self.id = id
         self.time_taken = time_taken
         self.memory_usage = memory_usage
+        self.time_metric = time_metric
 
     def to_dict(self):
         return {
@@ -47,12 +48,13 @@ def run_bench_mark(
         progress_bar.set_description(f"Processing sample {data['id']}")
         
         start = time.time()
-        output, memory_usage = generate(model, tokenizer, prompt, num_beams, max_tokens)
+        output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_tokens)
+
         #for i in range(len(output)):
         #    print(":", tokenizer.decode(output[i].long()))
         end = time.time()
         
-        metric = Metric(data['id'], end - start, memory_usage)
+        metric = Metric(data['id'], end - start, memory_usage, time_metric)
         metrics_list.append(metric)
 
         # Update progress bar postfix with current metrics
