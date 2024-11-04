@@ -43,7 +43,7 @@ def run_bench_mark(
     metrics_list = []
     for i in progress_bar:
         data = dataset[i]
-        prompt = data['text'][:20]
+        prompt = "Article: " + data['text'] + "\n Summary:"
         
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
