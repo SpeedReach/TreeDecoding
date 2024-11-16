@@ -34,6 +34,7 @@ def convert_cnn_format(d):
         'id': d['id'],
         'text': d['article']  # 或者如果要包含摘要：example['article'] + " " + example['highlights']
     }
+
 ds = ds.map(
     convert_cnn_format,
     batched=True,
@@ -65,5 +66,9 @@ for parameter in parameters:
 
     for metric in metrics:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
-    
+
+
+
+
+
 
