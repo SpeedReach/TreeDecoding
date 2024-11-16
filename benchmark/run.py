@@ -84,11 +84,10 @@ Summarize the following text:
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens)
 
+        if isinstance(output, str):
+            print(":", output)
         for i in range(len(output)):
-            if isinstance(output[i], str):
-                print(":", output[i])
-            else:
-                print(":", tokenizer.decode(output[i].long()))
+            print(":", tokenizer.decode(output[i].long()))
         
         end = time.time()
         
