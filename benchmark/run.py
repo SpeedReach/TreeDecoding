@@ -85,7 +85,10 @@ Summarize the following text:
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens)
 
         for i in range(len(output)):
-            print(":", tokenizer.decode(output[i].long()))
+            if output[i] is str:
+                print(":", output[i])
+            else:
+                print(":", tokenizer.decode(output[i].long()))
         
         end = time.time()
         
