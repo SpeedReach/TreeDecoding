@@ -365,3 +365,17 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     max_score = max(x[1] for x in outputs)
     max_sequence = [x[0] for x in outputs if x[1] == max_score]
     return (max_sequence[0], LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)
+
+
+def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
+    tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
+
+def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
+    torch.cuda.empty_cache()
+    gpu_gc.collect()
+    #LlamaForCausalLM.clear()
+
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
+    
+    max_new_tokens = max_tokens - input_ids.shape[1]
+    return generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
