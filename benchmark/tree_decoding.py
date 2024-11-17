@@ -212,8 +212,6 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
 def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int], List[float]]:
     past_key_values = DynamicCache()
     input_len = input_ids.shape[1]
-    print("input length: ", input_len)
-
     device = model.device
 
     #generate the first 3 tokens
@@ -317,7 +315,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             
             #print(int(token_idx/beam_width)," add child")
             
-            if token_id == eos_token_id:
+            if token_id in eos_token_id:
                 #print(searchNode.idx, "ended")
                 #need_gc = True
                 completed_nodes.append(searchNode)
@@ -338,6 +336,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         #print("picked_scores ", picked_scores)
         #alive_beams -= len(completed_nodes)
         newest_branch = tmp_newest_branch
+        if len(completed_branches) >= beam_width:
+            break
     
     #find the best branch
     max_score=0
@@ -353,25 +353,15 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     for i in range(len(newest_branch)):
         output = torch.empty(0, device=model.device)
         branch_parent = newest_branch[i]
+        length = 0
+        score = branch_parent.acc_score
         while branch_parent is not None:
+            length += 1
             output = torch.cat((output, branch_parent.token_id.unsqueeze(0)))
             branch_parent = branch_parent.parent
         output=output.flip(dims=[0])
-        outputs.append(output)
+        outputs.append((output, score / length))
         #outputs = torch.cat((outputs, output.unsqueeze(0)))
-    return (outputs, LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)
-
-
-
-def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
-    tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
-
-def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
-    torch.cuda.empty_cache()
-    gpu_gc.collect()
-    LlamaForCausalLM.clear()
-
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    
-    max_new_tokens = max_tokens - input_ids.shape[1]
-    return generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+    max_score = max(x[1] for x in outputs)
+    max_sequence = [x[0] for x in outputs if x[1] == max_score]
+    return (max_sequence[0], LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)

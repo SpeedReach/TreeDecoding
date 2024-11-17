@@ -86,10 +86,8 @@ Summarize the following text:
 
         if isinstance(output, str):
             print(":", output)
-        for i in range(len(output)):
-            if isinstance(output[i], str):
-                print(":", output[i])
-            else:
+        else:
+            for i in range(len(output)):
                 print(":", tokenizer.decode(output[i].long()))
         
         end = time.time()
