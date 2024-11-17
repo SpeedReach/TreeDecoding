@@ -81,8 +81,14 @@ Summarize the following text:
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
         
+
+        input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
+        if input_ids.shape[1] + max_new_tokens > 8000:
+            break
+
+        max_tokens = max_new_tokens + input_ids.shape[1]
         start = time.time()
-        output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens)
+        output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_tokens)
 
         #if isinstance(output, str):
         #    print(":", output)
