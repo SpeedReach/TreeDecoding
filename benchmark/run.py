@@ -35,7 +35,9 @@ class Metric:
     def to_dict(self):
         return {
             "id": self.id,
+            "model_memory": self.model_memory,
             "time_taken": self.time_taken,
+            "input_kv_memory": self.input_kv_memory,
             "memory_usage": self.memory_usage,
             "time_metric": self.time_metric
         }
