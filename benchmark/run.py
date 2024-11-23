@@ -63,6 +63,7 @@ def run_bench_mark(
 
     torch.cuda.empty_cache()
     gpu_gc.collect()
+    LlamaForCausalLM.clear()
 
     model_memory = get_gpu_usage()
     
@@ -77,7 +78,9 @@ Summarize the following text:
 {data['text']}
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
-        
+        torch.cuda.empty_cache()
+        gpu_gc.collect()
+        LlamaForCausalLM.clear()
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
         

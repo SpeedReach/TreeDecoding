@@ -11,9 +11,6 @@ def origin_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     
 
 def origin_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
-    torch.cuda.empty_cache()
-    gpu_gc.collect()
-    LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     
