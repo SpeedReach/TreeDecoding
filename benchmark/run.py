@@ -52,7 +52,7 @@ def run_bench_mark(
     generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int], Tuple[str, List[int]]],
     task_type: TaskType,
     num_beams = 10,
-    max_new_tokens = 500,
+    max_new_tokens = 1000,
 ) -> List[Metric]:
     # Create tqdm progress bar
     progress_bar = tqdm(

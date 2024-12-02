@@ -45,7 +45,7 @@ ds = ds.map(
 parameters = [
     (3, 1000),
     (9 , 1000),
-    (15 , 1000)
+    (15 , 1000),
 ]
 
 
@@ -56,7 +56,7 @@ origin_warmup(model, tokenizer, "This is a test", 3, 500)
 
 for parameter in parameters:
     out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, TaskType.SUM, parameter[0], parameter[1], max_new_tokens=1000)
+    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, TaskType.SUM, parameter[0], parameter[1])
 
     for metric in metrics:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
