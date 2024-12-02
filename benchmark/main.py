@@ -62,7 +62,6 @@ for parameter in parameters:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
-exit(0)
 
 
 
