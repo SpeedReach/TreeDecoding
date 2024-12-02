@@ -95,7 +95,7 @@ Summarize the following text:
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
 
-        print(":", tokenizer.decode(output.long()))
+        #print(":", tokenizer.decode(output))
         
         end = time.time()
         
