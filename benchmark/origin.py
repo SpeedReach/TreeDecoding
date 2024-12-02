@@ -10,11 +10,10 @@ def origin_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     model.generate(input_ids, attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_tokens, temperature=None, top_p=None)
     
 
-def origin_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
+def origin_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[str, List[int], List[float]]:
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    
-    max_new_tokens = max_tokens - input_ids.shape[1]
+
     attention_mask = torch.ones_like(input_ids)
     outputs = model.generate(input_ids,attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_new_tokens, temperature=None, top_p = None, early_stopping="never")
 
