@@ -55,7 +55,7 @@ parameters = [
 
 
 
-origin_warmup(model, tokenizer, "This is a test", 3, 500)
+origin_warmup(model, tokenizer, "This is a test", 3, 1000)
 
 for parameter in parameters:
     out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
@@ -65,7 +65,7 @@ for parameter in parameters:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
-tree_warmup(model, tokenizer, "This is a test", 3, 500)
+tree_warmup(model, tokenizer, "This is a test", 3, 1000)
 
 for parameter in parameters:
     out_file = open(f"out/tree/{parameter[0]}_{parameter[1]}.jsonl", "w")
