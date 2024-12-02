@@ -16,6 +16,9 @@ from typing import List
 
 logging.set_verbosity_error()
 
+import sys
+sys.setrecursionlimit(3000)
+
 
 
 model_name = "meta-llama/Llama-3.1-8B-Instruct"
