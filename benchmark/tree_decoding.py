@@ -79,7 +79,7 @@ def determine_unused_nodes(searchTree: SearchTree, targets: List[int]) -> Tuple[
     return (all_used, all_unused)
 
 
-minFloat = torch.finfo(torch.float32).min
+minFloat = torch.finfo(torch.float16).min
 
 def fill_causal_mask(mask: torch.Tensor, searchTree: SearchTree,input_len: int,nodes: List[SearchNode]):
     mask.fill_(minFloat)
@@ -248,7 +248,7 @@ def is_done(self, best_sum_logprobs: float, cur_len: int, decoder_prompt_len: Op
 def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int], List[float]]:
     past_key_values = DynamicCache()
     input_len = input_ids.shape[1]
-    print("input length: ", input_len)
+    #print("input length: ", input_len)
 
     device = model.device
 
@@ -278,7 +278,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     alive_beams = beam_width
 
     need_gc = False
-    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float32)
+    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float16)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ]    
     early_complete = False
@@ -354,7 +354,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             #print(int(token_idx/beam_width)," add child")
             
             if token_id in eos_token_id:
-                print(i, "ended")
+                #print(i, "ended")
                 #need_gc = True
                 completed_nodes.append(searchNode)
                 completed_branches.append(searchNode)
@@ -369,7 +369,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
             if len(tmp_newest_branch) >= alive_beams:
                 break
-        print(i, picked_scores)
+        #print(i, picked_scores)
         next_indices = final_picked_parents
         #print("picks ", picked)
         #print("picked_scores ", picked_scores)
