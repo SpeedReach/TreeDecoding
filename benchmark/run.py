@@ -14,6 +14,7 @@ class TaskType(Enum):
 
 import GPUtil
 import time
+
 def get_gpu_usage():
     gpus = GPUtil.getGPUs()
     total = 0

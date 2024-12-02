@@ -13,10 +13,10 @@ class SearchNode:
         self.root: 'SearchTree' = root
         self.idx: int = idx
         self.token_id: Tensor = token_id
-        self.token_score: float = token_score
+        self.token_score: torch.FloatTensor = token_score
         self.parent: Optional['SearchNode'] = None
         self.children: List['SearchNode'] = []
-        self.acc_score: float = token_score
+        self.acc_score: torch.FloatTensor = token_score
 
 
     def add_children(self, child):
@@ -79,10 +79,10 @@ def determine_unused_nodes(searchTree: SearchTree, targets: List[int]) -> Tuple[
     return (all_used, all_unused)
 
 
-
+minFloat = torch.finfo(torch.float32).min
 
 def fill_causal_mask(mask: torch.Tensor, searchTree: SearchTree,input_len: int,nodes: List[SearchNode]):
-    mask.fill_(-65504)
+    mask.fill_(minFloat)
     branch_count = len(nodes)
     mask[0, 0,:,:input_len] = 0
     tmp = nodes.copy()
@@ -99,7 +99,7 @@ def fill_causal_mask(mask: torch.Tensor, searchTree: SearchTree,input_len: int,n
             return
 
 def fill_causal_mask_fast(mask: torch.Tensor, searchTree: 'SearchTree', input_len: int, nodes: List['SearchNode']):
-    mask.fill_(-65504)  # Initialize all values in the mask
+    mask.fill_(minFloat)  # Initialize all values in the mask
     branch_count = len(nodes)
     mask[0, 0, :, :input_len] = 0  # Set the initial mask for input length
 
@@ -208,10 +208,48 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
     #print_tree_state(searchTree, newest_branch)
     return 
 
+def is_done(self, best_sum_logprobs: float, cur_len: int, decoder_prompt_len: Optional[int] = 0) -> bool:
+        """
+        If there are enough hypotheses and that none of the hypotheses being generated can become better than the worst
+        one in the heap, then we are done with this sentence.
+        """
+
+        if len(self) < self.num_beams:
+            return False
+
+        # `True`: stop as soon as at least `num_beams` hypotheses are finished
+        if self.early_stopping is True:
+            return True
+        # `False`: heuristic -- compute best possible score from `cur_len`, even though it is not entirely accurate
+        #  when `length_penalty` is positive. See the discussion below for more details.
+        # https://github.com/huggingface/transformers/pull/20901#issuecomment-1369845565
+        elif self.early_stopping is False:
+            highest_attainable_score = best_sum_logprobs / (cur_len - decoder_prompt_len) ** self.length_penalty
+            ret = self.worst_score >= highest_attainable_score
+            return ret
+        # `"never"`: compute the best possible score, depending on the signal of `length_penalty`
+        else:
+            # `length_penalty` > 0.0 -> max denominator is obtaned from `max_length`, not from `cur_len` -> min
+            # abs(`highest_attainable_score`) is obtained -> `highest_attainable_score` is negative, hence we obtain
+            # its max this way
+            if self.length_penalty > 0.0:
+                if self.max_length <= decoder_prompt_len:
+                    raise ValueError("max_length is not larger than decoder prompt length")
+                highest_attainable_score = (
+                    best_sum_logprobs / (self.max_length - decoder_prompt_len) ** self.length_penalty
+                )
+            # the opposite logic applies here (max `highest_attainable_score` from `cur_len`)
+            else:
+                highest_attainable_score = best_sum_logprobs / (cur_len - decoder_prompt_len) ** self.length_penalty
+            ret = self.worst_score >= highest_attainable_score
+            return ret
+
 @torch.no_grad()
 def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int], List[float]]:
     past_key_values = DynamicCache()
     input_len = input_ids.shape[1]
+    print("input length: ", input_len)
+
     device = model.device
 
     #generate the first 3 tokens
@@ -240,9 +278,10 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     alive_beams = beam_width
 
     need_gc = False
-    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), -65504, device=device, dtype=torch.float16)
+    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float32)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ]    
+    early_complete = False
     for i in range(input_len, max_new_tokens+input_len):
         if  ((i % 30 == 0 and alive_beams > 2) or need_gc) and True:
             gc_start = time.time()
@@ -286,10 +325,10 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         beam_score = beam_score.view((1, 1, alive_beams, 1))
         token_scores = token_scores + beam_score
         
-        
         vocab_size = token_scores.shape[-1]
         token_scores = token_scores.view(alive_beams * vocab_size)
-        n_tokens_to_keep = 2 * alive_beams
+        n_eos_tokens = len(eos_token_id) if eos_token_id is not None else 0
+        n_tokens_to_keep = max(2, 1 + n_eos_tokens) * alive_beams
         token_scores, tokens = torch.topk(
             token_scores, n_tokens_to_keep, dim=0, largest=True, sorted=True
         )
@@ -307,37 +346,39 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         picked_scores = []
         final_picked_parents = []
         
-        for i in range(len(tokens)):
-            token_id = tokens[i]
+        for j in range(len(tokens)):
+            token_id = tokens[j]
             picked.append(token_id.item())
-            picked_scores.append(token_scores[i].item())
-            searchNode = SearchNode(searchTree, idx, token_id=token_id, token_score = token_scores[i])
+            searchNode = SearchNode(searchTree, idx, token_id=token_id, token_score = token_scores[j])
             
             #print(int(token_idx/beam_width)," add child")
             
             if token_id in eos_token_id:
-                #print(searchNode.idx, "ended")
+                print(i, "ended")
                 #need_gc = True
                 completed_nodes.append(searchNode)
                 completed_branches.append(searchNode)
-                searchNode.parent = newest_branch[next_indices[i]]
+                searchNode.parent = newest_branch[next_indices[j]]
                 #tmp_newest_branch.append(searchNode)
             else:
-                newest_branch[next_indices[i]].add_children(searchNode)
-                final_picked_parents.append(next_indices[i] - len(completed_nodes))
+                picked_scores.append(token_scores[j].item())
+                newest_branch[next_indices[j]].add_children(searchNode)
+                final_picked_parents.append(next_indices[j] - len(completed_nodes))
                 idx += 1
                 tmp_newest_branch.append(searchNode)
 
             if len(tmp_newest_branch) >= alive_beams:
                 break
-            
+        print(i, picked_scores)
         next_indices = final_picked_parents
         #print("picks ", picked)
         #print("picked_scores ", picked_scores)
         #alive_beams -= len(completed_nodes)
         newest_branch = tmp_newest_branch
-        if len(completed_branches) >= beam_width:
-            break
+        #for metrics we remove early stop
+        #if len(completed_branches) >= beam_width:
+        #    early_complete = True
+        #    break
     
     #find the best branch
     max_score=0
@@ -349,7 +390,10 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
     #construct the output
     outputs = []
-    newest_branch = newest_branch + completed_branches
+    if early_complete:
+        newest_branch = completed_branches
+    else:
+        newest_branch = newest_branch + completed_branches
     for i in range(len(newest_branch)):
         output = torch.empty(0, device=model.device)
         branch_parent = newest_branch[i]
@@ -367,11 +411,18 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     return (max_sequence[0], LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)
 
 
+
 def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
 
 def tree_generate(model, tokenizer, prompt, num_beams, max_tokens) -> Tuple[str, List[int], List[float]]:
+    torch.cuda.empty_cache()
+    gpu_gc.collect()
+    #LlamaForCausalLM.clear()
+
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     
     max_new_tokens = max_tokens - input_ids.shape[1]
     return generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+
+
