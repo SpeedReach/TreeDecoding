@@ -363,7 +363,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             else:
                 picked_scores.append(token_scores[j].item())
                 newest_branch[next_indices[j]].add_children(searchNode)
-                final_picked_parents.append(next_indices[j] - len(completed_nodes))
+                final_picked_parents.append(next_indices[j]) #- len(completed_nodes))
                 idx += 1
                 tmp_newest_branch.append(searchNode)
 
