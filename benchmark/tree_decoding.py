@@ -371,6 +371,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
                 break
         #print(i, picked_scores)
         next_indices = final_picked_parents
+        print("final picked ", next_indices)
         #print("picks ", picked)
         #print("picked_scores ", picked_scores)
         #alive_beams -= len(completed_nodes)
