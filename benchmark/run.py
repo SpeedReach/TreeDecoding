@@ -98,7 +98,7 @@ Summarize the following text:
         if isinstance(output, str):
             print(":", output)
         else:
-            print(":", tokenizer.decode(output))
+            print(":", tokenizer.decode(output.long()))
         
         end = time.time()
         
