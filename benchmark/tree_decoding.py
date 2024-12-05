@@ -409,13 +409,13 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
 
-def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[str, List[int], List[float]]:
+def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[List[int], List[int], List[float]]:
     torch.cuda.empty_cache()
     gpu_gc.collect()
     LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
-    return (tokenizer.decode(output[0].long(), skip_special_tokens=True), output[1], output[2])
+    return (output[0].long(), output[1], output[2])
 
 

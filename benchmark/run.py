@@ -65,7 +65,7 @@ def get_gpu_usage():
 
 class Metric:
 
-    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float):
+    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float,output_len: int):
         self.model_memory = model_memory
         self.input_kv_memory = memory_usage[0]
         self.id = id
@@ -73,6 +73,7 @@ class Metric:
         self.memory_usage = memory_usage
         self.time_metric = time_metric
         self.score = score
+        self.output_len = output_len
 
     def to_dict(self):
         return {
@@ -82,7 +83,8 @@ class Metric:
             "input_kv_memory": self.input_kv_memory,
             "memory_usage": self.memory_usage,
             "time_metric": self.time_metric,
-            "score": self.score
+            "score": self.score,
+            "output_len": self.output_len
         }
     
 
@@ -139,9 +141,10 @@ Summary:
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
 
-        #print(":", output)
+        completion = tokenizer.decode(output, skip_special_tokens=True)
+        print(":", completion)
 
-        rouge_score = rouge.score(output, data['highlights'])['rouge2'].fmeasure
+        rouge_score = rouge.score(completion, data['highlights'])['rouge2'].fmeasure
         
         end = time.time()
         
@@ -151,7 +154,8 @@ Summary:
             time_taken=end - start,
             memory_usage=memory_usage,
             time_metric=time_metric,
-            score=rouge_score
+            score=rouge_score,
+            output_len=len(completion)
         )
         metrics_list.append(metric)
 
