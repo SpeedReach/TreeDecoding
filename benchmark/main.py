@@ -38,6 +38,12 @@ def convert_cnn_format(d):
         'highlights': d['highlights']
     }
 
+def convert_human_eval_format(d):
+    return {
+        'id': d['id'],
+        'prompt': d['prompt']
+    }
+
 def load_cnn_sum() -> datasets.Dataset:
     ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
     ds = ds.map(
