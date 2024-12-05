@@ -142,7 +142,6 @@ Summary:
         #print(":", output)
 
         rouge_score = rouge.score(output, data['highlights'])['rouge2'].fmeasure
-        print("rouge_score", rouge_score)
         
         end = time.time()
         
