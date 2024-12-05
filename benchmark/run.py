@@ -141,9 +141,9 @@ Summary:
 
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
-        print("shape",output.shape)
+        #print("shape",output.shape)
         completion = tokenizer.decode(output, skip_special_tokens=True)
-        print(":", completion)
+        #print(":", completion)
 
         rouge_score = rouge.score(completion, data['highlights'])['rouge2'].fmeasure
         
