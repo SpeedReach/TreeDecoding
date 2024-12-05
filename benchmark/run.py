@@ -95,10 +95,7 @@ Summarize the following text:
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
 
-        if isinstance(output, str):
-            print(":", output)
-        else:
-            print(":", tokenizer.decode(output.long()))
+        print(":", output)
         
         end = time.time()
         
@@ -116,6 +113,8 @@ Summarize the following text:
             'time': f"{metric.time_taken:.2f}s",
             'mem': f"{max(memory_usage) if memory_usage else 0:.2f}MB"
         })
+
+        
     
     return metrics_list
 

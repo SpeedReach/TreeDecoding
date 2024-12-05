@@ -280,7 +280,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     need_gc = False
     attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float16)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
-    next_indices = [x for x in range(beam_width) ]    
+    next_indices = [x for x in range(beam_width) ] 
     early_complete = False
     for i in range(input_len, max_new_tokens+input_len):
         if  ((i % 30 == 0 and alive_beams > 2) or need_gc) and True:
@@ -376,17 +376,9 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         #alive_beams -= len(completed_nodes)
         newest_branch = tmp_newest_branch
         #for metrics we remove early stop
-        #if len(completed_branches) >= beam_width:
-        #    early_complete = True
-        #    break
-    
-    #find the best branch
-    max_score=0
-    max_idx = 0
-    for i in range(alive_beams):
-        if newest_branch[i].acc_score > max_score:
-            max_score = newest_branch[i].acc_score
-            max_idx = i
+        if len(completed_branches) >= beam_width:
+            early_complete = True
+            break
 
     #construct the output
     outputs = []
@@ -418,9 +410,10 @@ def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
 def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[str, List[int], List[float]]:
     torch.cuda.empty_cache()
     gpu_gc.collect()
-    #LlamaForCausalLM.clear()
+    LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    return generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+    return (tokenizer.decode(output[0], skip_special_tokens=True), output[1], output[2])
 
 
