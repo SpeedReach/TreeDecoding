@@ -116,7 +116,6 @@ def run_bench_mark(
     rouge=rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
     for i in progress_bar:
         data = dataset[i]
-        print(data)
         if task_type == TaskType.SUM:
             prompt = f"""<|start_header_id|>system<|end_header_id|>
 You are a helpful assistant.

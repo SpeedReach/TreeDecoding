@@ -35,7 +35,8 @@ ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test'
 def convert_cnn_format(d):
     return {
         'id': d['id'],
-        'text': d['article']  # 或者如果要包含摘要：example['article'] + " " + example['highlights']
+        'text': d['article'],  # 或者如果要包含摘要：example['article'] + " " + example['highlights']
+        'highlights': d['highlights']
     }
 
 ds = ds.map(
