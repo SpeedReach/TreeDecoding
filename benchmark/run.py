@@ -115,10 +115,11 @@ def run_bench_mark(
         data = dataset[i]
         if task_type == TaskType.SUM:
             prompt = f"""<|start_header_id|>system<|end_header_id|>
-You are a helpful assistant capable of summarizing article highlights.
+You are a helpful assistant.
 <|eot_id|><|start_header_id|>user<|end_header_id|>
 Article:
 {data['text']}
+Summary:
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
         torch.cuda.empty_cache()
