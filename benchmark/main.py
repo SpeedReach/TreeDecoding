@@ -61,12 +61,15 @@ parameters = [
     (15 , 1000),
 ]
 
+task_type = TaskType.HUMAN_EVAL
+
+ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
 
 tree_warmup(model, tokenizer, "This is a test", 3, 1000)
 
 for parameter in parameters:
     out_file = open(f"out/tree/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, TaskType.SUM, parameter[0], parameter[1])
+    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, task_type, parameter[0], parameter[1])
     for metric in metrics:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
 
@@ -76,7 +79,7 @@ origin_warmup(model, tokenizer, "This is a test", 3, 1000)
 
 for parameter in parameters:
     out_file = open(f"out/origin/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, TaskType.SUM, parameter[0], parameter[1])
+    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, task_type, parameter[0], parameter[1])
 
     for metric in metrics:
         out_file.write(json.dumps(metric.to_dict()) + "\n")
