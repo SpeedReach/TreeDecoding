@@ -414,6 +414,6 @@ def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
-    return (tokenizer.decode(output, skip_special_tokens=True), output[1], output[2])
+    return (tokenizer.decode(output[0].long(), skip_special_tokens=True), output[1], output[2])
 
 
