@@ -14,6 +14,7 @@ for filename in os.listdir(in_folder):
         with open(os.path.join(out_folder, filename), 'w') as out_file:
             for line in file:
                 data = json.loads(line)
+                print(data.keys())
                 out_file.write(json.dumps({
                     "task_id": data['id'],
                     "completion": data['output']
