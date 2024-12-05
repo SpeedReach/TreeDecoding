@@ -14,6 +14,7 @@ from run import run_bench_mark, TaskType
 from transformers import logging
 from run import Metric
 from typing import List
+import os
 
 logging.set_verbosity_error()
 
@@ -73,29 +74,32 @@ parameters = [
 
 task_type = TaskType.HUMAN_EVAL
 
+
 ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
-
-tree_warmup(model, tokenizer, "This is a test", 3, 1000)
-
-for parameter in parameters:
-    out_file = open(f"out/tree/{task_type.name}/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, task_type, parameter[0], parameter[1])
-    for metric in metrics:
-        out_file.write(json.dumps(metric.to_dict()) + "\n")
-
 
 
 origin_warmup(model, tokenizer, "This is a test", 3, 1000)
 
 for parameter in parameters:
-    out_file = open(f"out/origin/{task_type.name}/{parameter[0]}_{parameter[1]}.jsonl", "w")
-    metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, task_type, parameter[0], parameter[1])
+    path = f"out/origin/{task_type.name}"
+    os.makedirs(path, exist_ok=True)
+    with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
+        metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, task_type, parameter[0], parameter[1])
+        for metric in metrics:
+            out_file.write(json.dumps(metric.to_dict()) + "\n")
 
-    for metric in metrics:
-        out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
 
+tree_warmup(model, tokenizer, "This is a test", 3, 1000)
+
+for parameter in parameters:
+    path = f"out/tree/{task_type.name}"
+    os.makedirs(path, exist_ok=True)
+    with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
+        metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, task_type, parameter[0], parameter[1])
+        for metric in metrics:
+            out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
 

@@ -29,4 +29,4 @@ for filename in os.listdir(in_folder):
                     "task_id": id,
                     "completion": ""
                 }) + "\n")
-        
+            print(f"missing {len(all_id_copy)} entries")
