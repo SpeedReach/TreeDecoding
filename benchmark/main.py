@@ -41,7 +41,7 @@ def convert_cnn_format(d):
 def convert_human_eval_format(d):
     return {
         'id': d['task_id'],
-        'text': d['text']
+        'text': d['prompt']
     }
 
 def load_cnn_sum() -> datasets.Dataset:
