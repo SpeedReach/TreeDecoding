@@ -122,6 +122,7 @@ def run_bench_mark(
             prompt = f"""<|start_header_id|>system<|end_header_id|>
 You are a helpful assistant.
 <|eot_id|><|start_header_id|>user<|end_header_id|>
+Output summary directly.
 Article:
 {data['text']}
 Summary:
@@ -140,7 +141,7 @@ Summary:
 
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
-
+        print("shape",output.shape)
         completion = tokenizer.decode(output, skip_special_tokens=True)
         print(":", completion)
 
