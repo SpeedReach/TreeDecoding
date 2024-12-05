@@ -75,9 +75,9 @@ def run_bench_mark(
         data = dataset[i]
         if task_type == TaskType.SUM:
             prompt = f"""<|start_header_id|>system<|end_header_id|>
-You are a helpful assistant capable of summarizing text accurately.
+You are a helpful assistant capable of summarizing article highlights accurately.
 <|eot_id|><|start_header_id|>user<|end_header_id|>
-Summarize the following text:
+Summarize the following article:
 {data['text']}
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
