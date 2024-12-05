@@ -72,35 +72,39 @@ parameters = [
     (15 , 1000),
 ]
 
-task_type = TaskType.HUMAN_EVAL
 
 
-ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
+def run_task(task_type: TaskType, data_num: int):
+    task_type = TaskType.HUMAN_EVAL
 
 
-origin_warmup(model, tokenizer, "This is a test", 3, 1000)
+    ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
 
-for parameter in parameters:
-    path = f"out/origin/{task_type.name}"
-    os.makedirs(path, exist_ok=True)
-    with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-        metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), origin_generate, task_type, parameter[0], parameter[1])
-        for metric in metrics:
-            out_file.write(json.dumps(metric.to_dict()) + "\n")
+    origin_warmup(model, tokenizer, "This is a test", 3, 1000)
+
+    for parameter in parameters:
+        path = f"out/origin/{task_type.name}"
+        os.makedirs(path, exist_ok=True)
+        with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
+            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), origin_generate, task_type, parameter[0], parameter[1])
+            for metric in metrics:
+                out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
 
 
-tree_warmup(model, tokenizer, "This is a test", 3, 1000)
+    tree_warmup(model, tokenizer, "This is a test", 3, 1000)
 
-for parameter in parameters:
-    path = f"out/tree/{task_type.name}"
-    os.makedirs(path, exist_ok=True)
-    with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-        metrics = run_bench_mark(model, tokenizer, ds.select(range(1)), tree_generate, task_type, parameter[0], parameter[1])
-        for metric in metrics:
-            out_file.write(json.dumps(metric.to_dict()) + "\n")
+    for parameter in parameters:
+        path = f"out/tree/{task_type.name}"
+        os.makedirs(path, exist_ok=True)
+        with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
+            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, parameter[0], parameter[1])
+            for metric in metrics:
+                out_file.write(json.dumps(metric.to_dict()) + "\n")
 
+run_task(TaskType.HUMAN_EVAL, 164)
+run_task(TaskType.SUM, 100)
 
 
 
