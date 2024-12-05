@@ -1,7 +1,7 @@
 import os
 import json
 
-in_folder = "out/tree"
+in_folder = "out/tree/HUMAN_EVAL"
 out_folder = "out/human_eval"
 
 all_ids = set()
