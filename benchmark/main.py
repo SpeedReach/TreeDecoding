@@ -54,7 +54,7 @@ def load_cnn_sum() -> datasets.Dataset:
     return ds
 
 def load_human_eval() -> datasets.Dataset:
-    ds = load_dataset("openai_humaneval")
+    ds = load_dataset("openai_humaneval", split='test')
     ds = ds.map(
         convert_human_eval_format,
         batched=True
