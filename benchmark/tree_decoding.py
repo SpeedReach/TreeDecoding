@@ -265,6 +265,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
     #define eos token
     eos_token_id = model.config.eos_token_id
+    if isinstance(eos_token_id, int):
+        eos_token_id = [eos_token_id]
 
     
     for i in range(beam_width):
