@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from transformers import LlamaTokenizer, cache_utils, AutoModelForCausalLM, AutoTokenizer, LlamaForCausalLM
 from transformers.cache_utils import DynamicCache
 import time
+import datasets
 from datasets import load_dataset
 import json
 
@@ -30,8 +31,6 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-
-ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
 def convert_cnn_format(d):
     return {
         'id': d['id'],
@@ -39,11 +38,20 @@ def convert_cnn_format(d):
         'highlights': d['highlights']
     }
 
-ds = ds.map(
-    convert_cnn_format,
-    batched=True,
-    remove_columns=['article', 'highlights']
-)
+def load_cnn_sum() -> datasets.Dataset:
+    ds = load_dataset("abisee/cnn_dailymail", "3.0.0", split='train+validation+test')
+    ds = ds.map(
+        convert_cnn_format,
+        batched=True,
+        remove_columns=['article', 'highlights']
+    )
+    return ds
+
+def load_human_eval() -> datasets.Dataset:
+    ds = load_dataset("openai_humaneval")
+    return ds
+
+
 
 # beams / max_tokens
 parameters = [

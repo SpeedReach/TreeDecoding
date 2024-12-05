@@ -10,6 +10,7 @@ from enum import Enum
 
 class TaskType(Enum):
     SUM = 1
+    HUMAN_EVAL = 2
 
 
 
@@ -65,7 +66,7 @@ def get_gpu_usage():
 
 class Metric:
 
-    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float,output_len: int):
+    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float,output_len: int, output: str):
         self.model_memory = model_memory
         self.input_kv_memory = memory_usage[0]
         self.id = id
@@ -74,6 +75,7 @@ class Metric:
         self.time_metric = time_metric
         self.score = score
         self.output_len = output_len
+        self.output = output
 
     def to_dict(self):
         return {
@@ -84,7 +86,8 @@ class Metric:
             "memory_usage": self.memory_usage,
             "time_metric": self.time_metric,
             "score": self.score,
-            "output_len": self.output_len
+            "output_len": self.output_len,
+            "output": self.output
         }
     
 
@@ -115,7 +118,7 @@ def run_bench_mark(
     model_memory = get_gpu_usage()
     
     metrics_list = []
-    rouge=rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
+    
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
@@ -128,6 +131,13 @@ Article:
 Summary:
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
+        elif task_type == TaskType.HUMAN_EVAL:
+            prompt = f"""<|start_header_id|>system<|end_header_id|>
+You are a helpful programmer assistant.
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Complete the following code:
+{data['prompt']}
+"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         LlamaForCausalLM.clear()
@@ -145,7 +155,10 @@ Summary:
         completion = tokenizer.decode(output, skip_special_tokens=True)
         #print(":", completion)
 
-        rouge_score = rouge.score(completion, data['highlights'])['rouge2'].fmeasure
+        score = 0
+        if task_type == TaskType.SUM:
+            rouge = rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
+            score = rouge.score(completion, data['highlights'])['rouge2'].fmeasure
         
         end = time.time()
         
@@ -155,8 +168,9 @@ Summary:
             time_taken=end - start,
             memory_usage=memory_usage,
             time_metric=time_metric,
-            score=rouge_score,
-            output_len=len(completion)
+            score=score,
+            output_len=len(output),
+            output=completion
         )
         metrics_list.append(metric)
 
