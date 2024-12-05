@@ -117,13 +117,10 @@ def run_bench_mark(
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
-            prompt = f"""<|start_header_id|>system<|end_header_id|>
-You are a helpful assistant.
-<|eot_id|><|start_header_id|>user<|end_header_id|>
+            prompt = f"""
 Article:
 {data['text']}
 Summary:
-<|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
         torch.cuda.empty_cache()
         gpu_gc.collect()
