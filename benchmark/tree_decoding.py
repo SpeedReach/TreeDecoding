@@ -250,6 +250,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     input_len = input_ids.shape[1]
     #print("input length: ", input_len)
 
+    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float16)
+
     device = model.device
 
     #generate the first 3 tokens
@@ -280,7 +282,6 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     alive_beams = beam_width
 
     need_gc = False
-    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float16)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ] 
     early_complete = False
