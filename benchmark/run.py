@@ -65,13 +65,14 @@ def get_gpu_usage():
 
 class Metric:
 
-    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float]):
+    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float):
         self.model_memory = model_memory
         self.input_kv_memory = memory_usage[0]
         self.id = id
         self.time_taken = time_taken
         self.memory_usage = memory_usage
         self.time_metric = time_metric
+        self.score = score
 
     def to_dict(self):
         return {
@@ -80,7 +81,8 @@ class Metric:
             "time_taken": self.time_taken,
             "input_kv_memory": self.input_kv_memory,
             "memory_usage": self.memory_usage,
-            "time_metric": self.time_metric
+            "time_metric": self.time_metric,
+            "score": self.score
         }
     
 
@@ -111,6 +113,7 @@ def run_bench_mark(
     model_memory = get_gpu_usage()
     
     metrics_list = []
+    rouge=rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
@@ -148,7 +151,8 @@ Summary:
             model_memory=model_memory,
             time_taken=end - start,
             memory_usage=memory_usage,
-            time_metric=time_metric
+            time_metric=time_metric,
+            score=rouge_score
         )
         metrics_list.append(metric)
 
