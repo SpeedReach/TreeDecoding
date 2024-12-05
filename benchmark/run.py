@@ -136,7 +136,7 @@ Summary:
 You are a helpful programmer assistant.
 <|eot_id|><|start_header_id|>user<|end_header_id|>
 Complete the following code:
-{data['prompt']}
+{data['text']}
 """
         torch.cuda.empty_cache()
         gpu_gc.collect()

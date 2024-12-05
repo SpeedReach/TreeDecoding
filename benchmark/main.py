@@ -40,8 +40,8 @@ def convert_cnn_format(d):
 
 def convert_human_eval_format(d):
     return {
-        'id': d['id'],
-        'prompt': d['prompt']
+        'id': d['task_id'],
+        'text': d['text']
     }
 
 def load_cnn_sum() -> datasets.Dataset:
