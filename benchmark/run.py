@@ -117,10 +117,13 @@ def run_bench_mark(
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
-            prompt = f"""
+            prompt = f"""<|start_header_id|>system<|end_header_id|>
+You are a helpful assistant.
+<|eot_id|><|start_header_id|>user<|end_header_id|>
 Article:
 {data['text']}
 Summary:
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
         torch.cuda.empty_cache()
         gpu_gc.collect()
@@ -136,7 +139,7 @@ Summary:
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
 
-        print(":", output)
+        #print(":", output)
 
         rouge_score = rouge.score(output, data['highlights'])
         print("rouge_score", rouge_score)
