@@ -137,6 +137,9 @@ Summary:
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
 
         print(":", output)
+
+        rouge_score = rouge.score(output, data['highlights'])
+        print("rouge_score", rouge_score)
         
         end = time.time()
         
