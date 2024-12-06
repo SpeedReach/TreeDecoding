@@ -75,8 +75,6 @@ parameters = [
 
 
 def run_task(task_type: TaskType, data_num: int):
-    task_type = TaskType.HUMAN_EVAL
-
 
     ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
 
@@ -101,9 +99,9 @@ def run_task(task_type: TaskType, data_num: int):
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
-run_task(TaskType.HUMAN_EVAL, 164)
+
 run_task(TaskType.SUM, 100)
 
-
+run_task(TaskType.HUMAN_EVAL, 164)
 
 
