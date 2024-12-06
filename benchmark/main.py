@@ -81,6 +81,8 @@ def run_task(task_type: TaskType, data_num: int):
     tree_warmup(model, tokenizer, "This is a test", 3, 1000)
 
     for parameter in parameters:
+        if parameter[0] == 1:
+            continue
         path = f"out/tree/{task_type.name}"
         os.makedirs(path, exist_ok=True)
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:

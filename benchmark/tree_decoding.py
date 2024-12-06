@@ -251,9 +251,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     #print("input length: ", input_len)
     device = model.device
     
-    attention_mask = torch.full((1, 1, beam_width, max_new_tokens * beam_width+input_len), minFloat, device=device, dtype=torch.float16)
-
-
+    
 
     #generate the first 3 tokens
     outputs = model(input_ids, past_key_values=past_key_values, use_cache=True)
@@ -283,10 +281,17 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     alive_beams = beam_width
 
     need_gc = False
+    mask_length = 100 * beam_width + input_len
+    attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ] 
     early_complete = False
     for i in range(input_len, max_new_tokens+input_len):
+        if len(newest_branch) >= beam_width and mask_length <= newest_branch[-1].idx + input_len:
+            mask_length = input_len + newest_branch[beam_width-1].idx + 100
+            attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
+            fill_causal_mask_fast(attention_mask, searchTree, input_len, newest_branch)
+            
         if  ((i % 30 == 0 and alive_beams > 2) or need_gc) and True:
             gc_start = time.time()
             #print("gcccc")
