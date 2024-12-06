@@ -89,7 +89,7 @@ def run_task(task_type: TaskType, data_num: int):
             metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, parameter[0], parameter[1])
             for metric in metrics:
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
-
+    return
     origin_warmup(model, tokenizer, "This is a test", 3, 1000)
 
     for parameter in parameters:
