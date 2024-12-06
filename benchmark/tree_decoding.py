@@ -281,7 +281,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     alive_beams = beam_width
 
     need_gc = False
-    mask_length = 10 * beam_width + input_len
+    mask_length = beam_width + input_len
     attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ] 
