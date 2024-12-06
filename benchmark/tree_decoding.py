@@ -288,7 +288,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     early_complete = False
     for i in range(input_len, max_new_tokens+input_len):
         if len(newest_branch) >= beam_width and mask_length <= newest_branch[-1].idx + input_len:
-            mask_length = input_len + newest_branch[beam_width-1].idx + 100
+            mask_length = input_len + newest_branch[beam_width-1].idx + 10
             attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
             fill_causal_mask_fast(attention_mask, searchTree, input_len, newest_branch)
 
