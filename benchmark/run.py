@@ -20,46 +20,14 @@ from functools import lru_cache
 
 from rouge_score import rouge_scorer
 
-class GPUMemoryMonitor:
-    def __init__(self):
-        """Initialize NVML"""
-        nvmlInit()
-        self._device_count = nvmlDeviceGetCount()
-        self._device_handles = [nvmlDeviceGetHandleByIndex(i) for i in range(self._device_count)]
-        
-    @lru_cache(maxsize=1)
-    def get_gpu_memory(self):
-        """
-        Get GPU memory usage using NVML
-        Returns: Dictionary with GPU index and memory usage in MB
-        """
-        try:
-            gpu_memory = {}
-            for idx, handle in enumerate(self._device_handles):
-                info = nvmlDeviceGetMemoryInfo(handle)
-                gpu_memory[f'gpu_{idx}'] = {
-                    'used': info.used // 1024 // 1024,  # Convert to MB
-                    'total': info.total // 1024 // 1024,
-                    'free': info.free // 1024 // 1024
-                }
-            return gpu_memory
-        except Exception as e:
-            return f"Error getting GPU info: {str(e)}"
-    
-    def __del__(self):
-        """Cleanup NVML"""
-        try:
-            nvmlShutdown()
-        except:
-            pass
 
-monitor = GPUMemoryMonitor()
+import GPUtil
+
 def get_gpu_usage():
-    memory_info = monitor.get_gpu_memory()
+    gpus = GPUtil.getGPUs()
     total = 0
-    for k in memory_info:
-        info = memory_info[k]
-        total += info['used']
+    for gpu in gpus:
+        total += gpu.memoryUsed
     return total
 
 
@@ -145,7 +113,7 @@ Complete the following code:
         progress_bar.set_description(f"Processing sample {data['id']}")
         
         model_memory = get_gpu_usage()
-        
+
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
         if input_ids.shape[1] + max_new_tokens > 8000:
             break
