@@ -115,7 +115,7 @@ def run_bench_mark(
     gpu_gc.collect()
     LlamaForCausalLM.clear()
 
-    model_memory = get_gpu_usage()
+    
     
     metrics_list = []
     
@@ -144,7 +144,8 @@ Complete the following code:
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
         
-
+        model_memory = get_gpu_usage()
+        
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
         if input_ids.shape[1] + max_new_tokens > 8000:
             break
