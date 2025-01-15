@@ -127,7 +127,7 @@ Complete the following code. No explaination is needed, output the code directly
             output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
         #print("shape",output.shape)
         completion = tokenizer.decode(output, skip_special_tokens=True)
-        #print(":", completion)
+        print(":", completion)
 
         score = 0
         if task_type == TaskType.SUM:

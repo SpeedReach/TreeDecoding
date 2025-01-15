@@ -106,4 +106,4 @@ def run_task(task_type: TaskType, data_num: int):
 run_task(TaskType.HUMAN_EVAL, 164)
 
 
-run_task(TaskType.SUM, 100)
+#run_task(TaskType.SUM, 1)
