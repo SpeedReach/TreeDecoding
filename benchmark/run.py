@@ -90,22 +90,20 @@ def run_bench_mark(
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
-            prompt = f"""<|start_header_id|>system<|end_header_id|>
+            prompt = f"""<s>[INST] <<SYS>>
 You are a helpful assistant.
-<|eot_id|><|start_header_id|>user<|end_header_id|>
+<</SYS>>
+
 Output summary directly.
 Article:
 {data['text']}
-Summary:
-<|eot_id|><|start_header_id|>assistant<|end_header_id|>
-            """
+Summary: [/INST]"""
         elif task_type == TaskType.HUMAN_EVAL:
-            prompt = f"""<|start_header_id|>system<|end_header_id|>
+            prompt = f"""<s>[INST] <<SYS>>
 You are a helpful programmer assistant.
-<|eot_id|><|start_header_id|>user<|end_header_id|>
+<</SYS>>
 Complete the following code:
-{data['text']}
-"""
+{data['text']} [/INST]"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         LlamaForCausalLM.clear()
