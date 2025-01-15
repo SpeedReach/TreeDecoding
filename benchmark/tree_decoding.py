@@ -79,7 +79,7 @@ def determine_unused_nodes(searchTree: SearchTree, targets: List[int]) -> Tuple[
     return (all_used, all_unused)
 
 
-minFloat = torch.finfo(torch.float16).min
+minFloat = torch.finfo(torch.float).min
 
 def fill_causal_mask(mask: torch.Tensor, searchTree: SearchTree,input_len: int,nodes: List[SearchNode]):
     mask.fill_(minFloat)
@@ -282,14 +282,14 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
     need_gc = False
     mask_length = beam_width + input_len
-    attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
+    attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float)
     fill_causal_mask(attention_mask, searchTree, input_len, newest_branch)
     next_indices = [x for x in range(beam_width) ] 
     early_complete = False
     for i in range(input_len, max_new_tokens+input_len):
         if len(newest_branch) >= beam_width and mask_length <= newest_branch[-1].idx + input_len:
             mask_length = input_len + newest_branch[beam_width-1].idx + 10
-            attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float16)
+            attention_mask = torch.full((1, 1, beam_width, mask_length), minFloat, device=device, dtype=torch.float)
             fill_causal_mask_fast(attention_mask, searchTree, input_len, newest_branch)
 
         if  ((i % 30 == 0 and alive_beams > 2) or need_gc) and True:
