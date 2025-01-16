@@ -188,6 +188,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
 
 @torch.no_grad()
 def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tuple[torch.Tensor, List[int]]:
+    early_complete = False
     gpu_usage = []
     device = model.device
     past_key_values = None
@@ -295,11 +296,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tu
                 break
         #print(i, picked_scores)
         next_indices = final_picked_parents
-        #print("picks ", picked)
-        #print("picked_scores ", picked_scores)
-        #alive_beams -= len(completed_nodes)
         newest_branch = tmp_newest_branch
-        #for metrics we remove early stop
         if len(completed_branches) >= beam_width:
             early_complete = True
             break
