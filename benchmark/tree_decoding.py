@@ -187,7 +187,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
     return 
 
 @torch.no_grad()
-def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tuple[torch.Tensor, List[int]]:
+def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int]]:
     early_complete = False
     gpu_usage = []
     device = model.device
@@ -221,7 +221,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tu
     completed_branches = []
 
     need_gc = False
-    for i in range(input_len, max_tokens):
+    for i in range(input_len, max_new_tokens+ input_len):
         if  ((i % 5 == 0) or need_gc) and True:
            # print("gcccc")
             need_gc = False
@@ -335,8 +335,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tu
 
 
 
-def tree_warmup(model, tokenizer, prompt, num_beams, max_tokens):
-    tree_generate(model, tokenizer, prompt, num_beams, max_tokens)
+def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens):
+    tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens)
 
 def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[List[int], List[int], List[float]]:
     torch.cuda.empty_cache()
@@ -344,7 +344,7 @@ def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[
     LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_tokens=max_new_tokens)
+    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
     return (output[0].long(), output[1], output[2])
 
 
