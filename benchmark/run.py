@@ -113,8 +113,8 @@ Complete the following code. No explaination is needed, output the code directly
         model_memory = get_gpu_usage()
 
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-        if input_ids.shape[1] + max_new_tokens > 8000:
-            break
+        if input_ids.shape[1] + max_new_tokens > 4000:
+            continue
 
         start = time.time()
         output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
