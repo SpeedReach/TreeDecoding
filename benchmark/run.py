@@ -100,9 +100,9 @@ Article:
 Summary: [/INST]"""
         elif task_type == TaskType.HUMAN_EVAL:
             prompt = f"""<s>[INST] <<SYS>>
-You are a helpful programmer assistant.
+You are a programmer.
 <</SYS>>
-Complete the following code:
+Complete the following code. I need the output for downstream pipeline, so output the code directly, with no other symbols no explaination and no ``` wrapping the code.
 {data['text']} [/INST]"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
