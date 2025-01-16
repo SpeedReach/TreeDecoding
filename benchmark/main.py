@@ -65,9 +65,9 @@ def load_human_eval() -> datasets.Dataset:
 
 # beams / max_tokens
 parameters = [
-   # (1 , 1000),
-   # (3, 1000),
-   # (9 , 1000),
+    (1 , 1000),
+    (3, 1000),
+    (9 , 1000),
     (15 , 1000),
 ]
 
@@ -103,7 +103,7 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-#run_task(TaskType.HUMAN_EVAL, 163)
+run_task(TaskType.HUMAN_EVAL, 164)
 
 
-run_task(TaskType.SUM, 2)
+run_task(TaskType.SUM, 100)
