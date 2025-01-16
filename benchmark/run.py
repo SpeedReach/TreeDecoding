@@ -102,8 +102,8 @@ Summary: [/INST]"""
             prompt = f"""<s>[INST] <<SYS>>
 You are a programmer.
 <</SYS>>
-Complete the following code. I need the output for downstream pipeline, so output the code directly, with no other symbols no explaination and no ``` wrapping the code.
-{data['text']} [/INST]"""
+Complete the following code. No explaination is needed, output the code directly.
+{problem} [/INST]"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         LlamaForCausalLM.clear()
