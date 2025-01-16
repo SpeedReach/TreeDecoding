@@ -338,7 +338,7 @@ def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[
     LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_tokens=max_new_tokens)
     return (output[0].long(), output[1], output[2])
 
 
