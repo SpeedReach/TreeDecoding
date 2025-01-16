@@ -1,7 +1,7 @@
 import os
 import json
 
-in_folder = "out/tree/HUMAN_EVAL"
+in_folder = "out/origin/HUMAN_EVAL"
 out_folder = "out/human_eval"
 
 all_ids = set()
@@ -19,9 +19,14 @@ for filename in os.listdir(in_folder):
             all_id_copy = all_ids.copy()
             for line in file:
                 data = json.loads(line)
+                completion = data['output']
+                completion = completion.split("```")
+                if len(completion) < 2:
+                    continue
+                completion = completion[1]
                 out_file.write(json.dumps({
                     "task_id": data['id'],
-                    "completion": data['output']
+                    "completion": completion
                 }) + "\n")
                 all_id_copy.remove(data['id'])
             for id in all_id_copy:
@@ -30,3 +35,5 @@ for filename in os.listdir(in_folder):
                     "completion": ""
                 }) + "\n")
             print(f"missing {len(all_id_copy)} entries")
+
+
