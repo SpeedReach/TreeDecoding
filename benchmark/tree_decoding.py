@@ -9,7 +9,16 @@ from typing import List, Tuple
 import time
 
 from typing import List, Tuple
+import GPUtil
 
+import torch
+import gc as gpu_gc
+
+
+def get_gpu_usage():
+    gpus = GPUtil.getGPUs()
+    return gpus[0].memoryUsed
+    
 minFloat = torch.finfo(torch.float).min
 device = "cuda" if torch.cuda.is_available() else "cpu"
 class SearchNode:
