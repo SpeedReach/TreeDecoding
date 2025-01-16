@@ -103,7 +103,7 @@ Summary: [/INST]"""
 You are a programmer.
 <</SYS>>
 Complete the following code. No explaination is needed, output the code directly.
-{problem} [/INST]"""
+{data['text']} [/INST]"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         LlamaForCausalLM.clear()
