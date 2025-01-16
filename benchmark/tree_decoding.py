@@ -34,7 +34,7 @@ class SearchNode:
 
 
 class SearchTree:
-    def __init__(self, beam_width=3):
+    def __init__(self,model, beam_width=3):
         self.node_count: int = 0
         self.model = model
         self.device = model.device
@@ -192,7 +192,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_tokens=300) -> Tu
     token_scores = F.log_softmax(outputs.logits, dim=-1)
 
     token_scores, tokens = torch.topk(token_scores, beam_width, dim=-1, largest=True, sorted=True)
-    searchTree = SearchTree(beam_width = beam_width)
+    searchTree = SearchTree(model,beam_width = beam_width)
     newest_branch: List[SearchNode] = []
     idx = 0
 
