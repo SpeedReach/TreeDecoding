@@ -331,8 +331,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
 
 
 
-def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id):
-    tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id)
+def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens):
+    tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, [32000])
 
 def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id) -> Tuple[List[int], List[int], List[float]]:
     torch.cuda.empty_cache()
