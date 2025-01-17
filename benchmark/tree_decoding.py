@@ -187,7 +187,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
     return 
 
 @torch.no_grad()
-def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eos_token_id: List[int]) -> Tuple[torch.Tensor, List[int]]:
+def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eos_token_id: List[int] = [32000]) -> Tuple[torch.Tensor, List[int]]:
     early_complete = False
     gpu_usage = []
     device = model.device
