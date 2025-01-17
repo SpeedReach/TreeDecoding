@@ -10,7 +10,7 @@ import json
 
 from origin import origin_generate, origin_warmup
 from tree_decoding import tree_generate, tree_warmup
-from run import run_bench_mark, TaskType
+from run import run_bench_mark, TaskType, ModelType
 from transformers import logging
 from run import Metric
 from typing import List
@@ -21,7 +21,7 @@ logging.set_verbosity_error()
 import sys
 sys.setrecursionlimit(3000)
 
-
+model_type = ModelType.LLAMA2
 
 model_name = "meta-llama/Llama-2-7b-chat-hf" 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -85,7 +85,7 @@ def run_task(task_type: TaskType, data_num: int):
         path = f"out/tree/{task_type.name}"
         os.makedirs(path, exist_ok=True)
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, parameter[0], parameter[1])
+            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
 
@@ -95,7 +95,7 @@ def run_task(task_type: TaskType, data_num: int):
         path = f"out/origin/{task_type.name}"
         os.makedirs(path, exist_ok=True)
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), origin_generate, task_type, parameter[0], parameter[1])
+            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), origin_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
 
