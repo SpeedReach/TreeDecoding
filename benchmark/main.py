@@ -21,7 +21,7 @@ logging.set_verbosity_error()
 import sys
 sys.setrecursionlimit(3000)
 
-model_type = ModelType.PHI35
+model_type = ModelType.LLAMA2
 
 if model_type == ModelType.LLAMA2:
     model_name = "meta-llama/Llama-2-7b-chat-hf" 
