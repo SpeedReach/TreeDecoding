@@ -10,7 +10,7 @@ def origin_warmup(model, tokenizer, prompt, num_beams, max_tokens):
     model.generate(input_ids, attention_mask=attention_mask, do_sample=False, num_beams=num_beams, max_new_tokens=max_tokens, temperature=None, top_p=None)
     
 
-def origin_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[List[int], List[int], List[float]]:
+def origin_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id) -> Tuple[List[int], List[int], List[float]]:
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
 

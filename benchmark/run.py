@@ -11,6 +11,7 @@ from enum import Enum
 class TaskType(Enum):
     SUM = 1
     HUMAN_EVAL = 2
+    LONG_BENCH = 3
 
 class ModelType(Enum):
     LLAMA2 = 1
