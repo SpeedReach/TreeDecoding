@@ -187,7 +187,7 @@ def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], pas
     return 
 
 @torch.no_grad()
-def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -> Tuple[torch.Tensor, List[int]]:
+def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eos_token_id: List[int]) -> Tuple[torch.Tensor, List[int]]:
     early_complete = False
     gpu_usage = []
     device = model.device
@@ -206,9 +206,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
     newest_branch: List[SearchNode] = []
     idx = 0
 
-    #define eos token
-    eos_token_id = model.config.eos_token_id
-    n_eos_tokens = 1
+    n_eos_tokens = len(eos_token_id)
     n_tokens_to_keep = max(2, 1 + n_eos_tokens) * beam_width
     
     for i in range(beam_width):
@@ -252,8 +250,6 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
         
         vocab_size = token_scores.shape[-1]
         token_scores = token_scores.view(beam_width * vocab_size)
-        n_eos_tokens = 1
-        n_tokens_to_keep = max(2, 1 + n_eos_tokens) * beam_width
         token_scores, tokens = torch.topk(
             token_scores, n_tokens_to_keep, dim=0, largest=True, sorted=True
         )
@@ -278,7 +274,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
             
             #print(int(token_idx/beam_width)," add child")
             
-            if token_id == eos_token_id:
+            if token_id in eos_token_id:
                 #print(i, "ended")
                 #need_gc = True
                 completed_nodes.append(searchNode)
@@ -335,16 +331,16 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300) -
 
 
 
-def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens):
-    tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens)
+def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id):
+    tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id)
 
-def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens) -> Tuple[List[int], List[int], List[float]]:
+def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id) -> Tuple[List[int], List[int], List[float]]:
     torch.cuda.empty_cache()
     gpu_gc.collect()
     LlamaForCausalLM.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens)
+    output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens, eos_token_id=eos_token_id)
     return (output[0].long(), output[1], output[2])
 
 
