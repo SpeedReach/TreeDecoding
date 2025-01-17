@@ -21,7 +21,7 @@ logging.set_verbosity_error()
 import sys
 sys.setrecursionlimit(3000)
 
-model_type = ModelType.LLAMA2
+model_type = ModelType.PHI35
 
 if model_type == ModelType.LLAMA2:
     model_name = "meta-llama/Llama-2-7b-chat-hf" 
@@ -33,7 +33,6 @@ model = AutoModelForCausalLM.from_pretrained(
     model_name,
     device_map="auto"
 )
-tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
 def convert_cnn_format(d):
@@ -109,10 +108,6 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
+run_task(TaskType.SUM, 200)
 
-
-run_task(TaskType.HUMAN_EVAL, 1)
-
-
-#run_task(TaskType.SUM, 200)
-
+#run_task(TaskType.HUMAN_EVAL, 1)

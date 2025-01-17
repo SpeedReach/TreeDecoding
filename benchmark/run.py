@@ -115,7 +115,7 @@ Output summary directly.
                 prompt = f"""<s>[INST] <<SYS>>
 You are a programmer.
 <</SYS>>
-Complete the following code. No explaination is needed, output the code directly.
+Complete the following function. No explaination is needed, output the code directly.
 {data['text']} [/INST]"""
             elif model_type == ModelType.PHI35:
                 prompt = f"""<|system|>
@@ -133,7 +133,7 @@ Complete the following function. No explaination is needed, output the code dire
         model_memory = get_gpu_usage()
 
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-        if input_ids.shape[1] + max_new_tokens > 4000:
+        if input_ids.shape[1] + max_new_tokens > 10000:
             continue
 
         start = time.time()

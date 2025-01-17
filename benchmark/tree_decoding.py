@@ -294,9 +294,10 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
         #print(i, picked_scores)
         next_indices = final_picked_parents
         newest_branch = tmp_newest_branch
+        if early_complete:
+            break
         if len(completed_branches) >= beam_width:
             early_complete = True
-            break
     
     #find the best branch
     max_score=0
@@ -339,7 +340,6 @@ def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token
     torch.cuda.empty_cache()
     gpu_gc.collect()
     metrics.clear()
-    print("eos token: ", eos_token_id)
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens, eos_token_id=eos_token_id)

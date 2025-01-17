@@ -20,10 +20,6 @@ for filename in os.listdir(in_folder):
             for line in file:
                 data = json.loads(line)
                 completion = data['output']
-                completion = completion.split("```")
-                if len(completion) < 2:
-                    continue
-                completion = completion[1]
                 out_file.write(json.dumps({
                     "task_id": data['id'],
                     "completion": completion
