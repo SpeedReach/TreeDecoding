@@ -12,6 +12,9 @@ class TaskType(Enum):
     SUM = 1
     HUMAN_EVAL = 2
 
+class ModelType(Enum):
+    LLAMA2 = 1
+    PHI35 = 2
 
 
 from pynvml import nvmlInit, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex
@@ -66,6 +69,7 @@ def run_bench_mark(
     dataset: datasets.Dataset,
     generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int], Tuple[str, List[int]]],
     task_type: TaskType,
+    model_type: ModelType,
     num_beams = 10,
     max_new_tokens = 1000,
 ) -> List[Metric]:
@@ -117,7 +121,10 @@ Complete the following code. No explaination is needed, output the code directly
             continue
 
         start = time.time()
-        output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens )
+        if model_type == ModelType.LLAMA2:
+            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  model.config.eos_token_id )
+        elif model_type == ModelType.PHI35:
+            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
         #print("shape",output.shape)
         completion = tokenizer.decode(output, skip_special_tokens=True)
         #print(":", completion)
