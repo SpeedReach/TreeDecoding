@@ -68,7 +68,7 @@ def run_bench_mark(
     model: LlamaForCausalLM,
     tokenizer: LlamaTokenizer,
     dataset: datasets.Dataset,
-    generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int], Tuple[str, List[int]]],
+    generate: Callable[[LlamaForCausalLM, LlamaTokenizer, str, int, int, List[int]], Tuple[str, List[int]]],
     task_type: TaskType,
     model_type: ModelType,
     num_beams = 10,

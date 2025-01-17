@@ -339,6 +339,7 @@ def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token
     torch.cuda.empty_cache()
     gpu_gc.collect()
     metrics.clear()
+    print("eos token: ", eos_token_id)
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens, eos_token_id=eos_token_id)
