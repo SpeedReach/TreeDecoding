@@ -88,8 +88,7 @@ def run_bench_mark(
     gpu_gc.collect()
     metrics.clear()
 
-    
-    
+
     metrics_list = []
     
     for i in progress_bar:

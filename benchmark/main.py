@@ -82,7 +82,7 @@ def run_task(task_type: TaskType, data_num: int):
 
     ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
 
-    tree_warmup(model, tokenizer, "This is a test", 3, 1000)
+    tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
         if parameter[0] == 1:
