@@ -122,7 +122,7 @@ Complete the following code. No explaination is needed, output the code directly
 
         start = time.time()
         if model_type == ModelType.LLAMA2:
-            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  model.config.eos_token_id )
+            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens, [ model.config.eos_token_id ])
         elif model_type == ModelType.PHI35:
             output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
         #print("shape",output.shape)
