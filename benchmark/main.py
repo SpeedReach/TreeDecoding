@@ -21,15 +21,20 @@ logging.set_verbosity_error()
 import sys
 sys.setrecursionlimit(3000)
 
-model_type = ModelType.LLAMA2
+model_type = ModelType.PHI35
 
-model_name = "meta-llama/Llama-2-7b-chat-hf" 
+if model_type == ModelType.LLAMA2:
+    model_name = "meta-llama/Llama-2-7b-chat-hf" 
+elif model_type == ModelType.PHI35:
+    model_name = "microsoft/Phi-3.5-mini-instruct"
+
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     device_map="auto"
 )
 tokenizer.pad_token_id = tokenizer.eos_token_id
+
 
 def convert_cnn_format(d):
     return {
