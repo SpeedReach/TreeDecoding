@@ -70,9 +70,9 @@ def load_human_eval() -> datasets.Dataset:
 
 # beams / max_tokens
 parameters = [
-    (1 , 1000),
-    (3, 1000),
-    (9 , 1000),
+    #(1 , 1000),
+   # (3, 1000),
+    #(9 , 1000),
     (15 , 1000),
 ]
 
@@ -87,8 +87,10 @@ def run_task(task_type: TaskType, data_num: int):
     for parameter in parameters:
         if parameter[0] == 1:
             continue
+
         path = f"out/tree/{task_type.name}"
         os.makedirs(path, exist_ok=True)
+        print("processing tree ",parameter[0], "_",parameter[1] )
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
             metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
@@ -99,6 +101,7 @@ def run_task(task_type: TaskType, data_num: int):
     for parameter in parameters:
         path = f"out/origin/{task_type.name}"
         os.makedirs(path, exist_ok=True)
+        print("processing origin ",parameter[0], "_",parameter[1] )
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
             metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), origin_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
