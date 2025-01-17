@@ -94,7 +94,8 @@ def run_bench_mark(
     for i in progress_bar:
         data = dataset[i]
         if task_type == TaskType.SUM:
-            prompt = f"""<s>[INST] <<SYS>>
+            if model_type == ModelType.LLAMA2:
+                prompt = f"""<s>[INST] <<SYS>>
 You are a helpful assistant.
 <</SYS>>
 
@@ -102,12 +103,27 @@ Output summary directly.
 Article:
 {data['text']}
 Summary: [/INST]"""
+            elif model_type == ModelType.PHI35:
+                prompt = f"""<|system|>
+You are a helpful assistant.<|end|>
+<|user|>
+Output summary directly.
+{data['text']}<|end|>
+<|assistant|>"""
         elif task_type == TaskType.HUMAN_EVAL:
-            prompt = f"""<s>[INST] <<SYS>>
+            if model_type == ModelType.LLAMA2:
+                prompt = f"""<s>[INST] <<SYS>>
 You are a programmer.
 <</SYS>>
 Complete the following code. No explaination is needed, output the code directly.
 {data['text']} [/INST]"""
+            elif model_type == ModelType.PHI35:
+                prompt = f"""<|system|>
+You are a programmer.<|end|>
+<|user|>
+Complete the following code. No explaination is needed, output the code directly.
+{data['text']}<|end|>
+<|assistant|>"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         metrics.clear()
