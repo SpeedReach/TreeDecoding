@@ -62,7 +62,7 @@ class Metric:
             "output": self.output
         }
     
-
+from transformers.models import metrics
 
 def run_bench_mark(
     model: LlamaForCausalLM,
@@ -86,7 +86,7 @@ def run_bench_mark(
 
     torch.cuda.empty_cache()
     gpu_gc.collect()
-    LlamaForCausalLM.clear()
+    metrics.clear()
 
     
     
@@ -111,7 +111,7 @@ Complete the following code. No explaination is needed, output the code directly
 {data['text']} [/INST]"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
-        LlamaForCausalLM.clear()
+        metrics.clear()
         # Update progress bar description with current sample ID
         progress_bar.set_description(f"Processing sample {data['id']}")
         

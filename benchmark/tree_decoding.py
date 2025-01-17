@@ -130,6 +130,7 @@ def print_tree_state(searchTree: SearchTree,nodes: List[SearchNode]):
 import torch
 import torch.nn.functional as F
 from collections import deque
+from transformers.models import metrics
 
 
 def prune_kv_cache(past_key_values, input_length, remove_idx: List[int]):
@@ -325,7 +326,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
         #outputs = torch.cat((outputs, output.unsqueeze(0)))
     max_score = max(x[1] for x in outputs)
     max_sequence = [x[0] for x in outputs if x[1] == max_score]
-    return (max_sequence[0], LlamaForCausalLM.used_gpu, LlamaForCausalLM.time_metric)
+    return (max_sequence[0], metrics.memory_metrics, metrics.time_metrics)
 
 
 
@@ -337,7 +338,7 @@ def tree_warmup(model, tokenizer, prompt, num_beams, max_new_tokens):
 def tree_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_token_id) -> Tuple[List[int], List[int], List[float]]:
     torch.cuda.empty_cache()
     gpu_gc.collect()
-    LlamaForCausalLM.clear()
+    metrics.clear()
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
     output = generate_next_tokens(model, input_ids, beam_width=num_beams, max_new_tokens=max_new_tokens, eos_token_id=eos_token_id)
