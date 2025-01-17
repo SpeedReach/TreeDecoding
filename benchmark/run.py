@@ -121,7 +121,7 @@ Complete the following code. No explaination is needed, output the code directly
                 prompt = f"""<|system|>
 You are a programmer.<|end|>
 <|user|>
-Complete the following code. No explaination is needed, output the code directly.
+Complete the following function. No explaination is needed, output the code directly.
 {data['text']}<|end|>
 <|assistant|>"""
         torch.cuda.empty_cache()
