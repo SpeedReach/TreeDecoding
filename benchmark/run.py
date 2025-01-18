@@ -11,7 +11,7 @@ from enum import Enum
 class TaskType(Enum):
     SUM = 1
     HUMAN_EVAL = 2
-    LONG_BENCH = 3
+    QASPER = 3
 
 class ModelType(Enum):
     LLAMA2 = 1
@@ -124,6 +124,12 @@ You are a programmer.<|end|>
 Complete the following function. No explaination is needed, output the code directly.
 {data['text']}<|end|>
 <|assistant|>"""
+        elif task_type == TaskType.QASPER:
+            if model_type == ModelType.PHI35:
+                prompt = f"""<|system|>
+You are a helpful assistant.<|end|>
+<|user|>{data['text']}<|end|>
+<|assistant|>"""
         torch.cuda.empty_cache()
         gpu_gc.collect()
         metrics.clear()
@@ -138,17 +144,17 @@ Complete the following function. No explaination is needed, output the code dire
 
         start = time.time()
         if model_type == ModelType.LLAMA2:
-            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens, [ model.config.eos_token_id ])
+            output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens, [ model.config.eos_token_id ])
         elif model_type == ModelType.PHI35:
-            output, memory_usage, time_metric  = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
+            output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
         #print("shape",output.shape)
         completion = tokenizer.decode(output, skip_special_tokens=True)
         print(":", completion)
 
         score = 0
-        if task_type == TaskType.SUM:
+        if task_type == TaskType.SUM or task_type == TaskType.QASPER:
             rouge = rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
-            score = rouge.score(completion, data['highlights'])['rouge2'].fmeasure
+            score = rouge.score(completion, data['answer'])['rouge2'].fmeasure
         
         end = time.time()
         

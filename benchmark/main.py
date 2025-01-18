@@ -39,13 +39,40 @@ def convert_cnn_format(d):
     return {
         'id': d['id'],
         'text': d['article'],  # 或者如果要包含摘要：example['article'] + " " + example['highlights']
-        'highlights': d['highlights']
+        'answer': d['highlights']
     }
 
 def convert_human_eval_format(d):
     return {
         'id': d['task_id'],
         'text': d['prompt']
+    }
+
+def convert_qasper_format(d):
+    full_text = json.loads(d['full_text'])
+    doc = ""
+    for paragraph in full_text["paragraphs"]:
+        doc += paragraph
+        doc += "\n"
+    qas = json.loads(d['qas'])
+    doc = f"""
+    Answer the question according to the following document, or answer "I don't know" if the document doesn't contain the answer.
+    Doc:
+    {doc}
+    Question:
+    {qas["question"][0]}
+    """
+    answer = ""
+    for ans in qas["answers"][0]["answer"]:
+        answer = ans["free_form_answer"]
+        if answer != "":
+            break
+    if answer == "":
+        answer = "I don't know."
+    return {
+        'id': d['id'],
+        'text': doc,
+        'answer': answer
     }
 
 def load_cnn_sum() -> datasets.Dataset:
@@ -65,7 +92,10 @@ def load_human_eval() -> datasets.Dataset:
     )
     return ds
 
-
+def load_qasper() -> datasets.Dataset:
+    ds = load_dataset("allenai/qasper")
+    ds = ds.map(convert_qasper_format, batched=True)
+    return ds
 
 # beams / max_tokens
 parameters = [
@@ -78,8 +108,13 @@ parameters = [
 
 
 def run_task(task_type: TaskType, data_num: int):
-
-    ds = load_human_eval() if task_type == TaskType.HUMAN_EVAL else load_cnn_sum()
+    match task_type:
+        case TaskType.HUMAN_EVAL:
+            ds = load_human_eval()
+        case TaskType.SUM:
+            ds = load_cnn_sum()
+        case TaskType.QASPER:
+            ds = load_qasper()
 
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
@@ -108,6 +143,6 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-run_task(TaskType.SUM, 200)
+run_task(TaskType.QASPER, 1)
 
 #run_task(TaskType.HUMAN_EVAL, 1)
