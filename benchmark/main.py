@@ -93,7 +93,7 @@ def load_human_eval() -> datasets.Dataset:
     return ds
 
 def load_qasper() -> datasets.Dataset:
-    ds = load_dataset("allenai/qasper")
+    ds = load_dataset("allenai/qasper", split='train')
     ds = ds.map(convert_qasper_format, batched=True)
     return ds
 
@@ -119,7 +119,6 @@ def run_task(task_type: TaskType, data_num: int):
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
-        continue
         if parameter[0] == 1:
             continue
 
