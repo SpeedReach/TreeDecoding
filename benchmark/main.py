@@ -144,6 +144,6 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-run_task(TaskType.QASPER, 1)
+run_task(TaskType.QASPER, 2)
 
 #run_task(TaskType.HUMAN_EVAL, 1)
