@@ -74,6 +74,7 @@ def run_bench_mark(
     num_beams = 10,
     max_new_tokens = 1000,
 ) -> List[Metric]:
+    
     # Create tqdm progress bar
     progress_bar = tqdm(
         range(len(dataset)),
@@ -93,6 +94,7 @@ def run_bench_mark(
     
     for i in progress_bar:
         data = dataset[i]
+        print(data)
         if task_type == TaskType.SUM:
             if model_type == ModelType.LLAMA2:
                 prompt = f"""<s>[INST] <<SYS>>
