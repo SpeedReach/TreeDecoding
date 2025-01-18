@@ -99,9 +99,9 @@ def load_qasper() -> datasets.Dataset:
 
 # beams / max_tokens
 parameters = [
-    (1 , 1000),
-    (3, 1000),
-    (9 , 1000),
+#    (1 , 1000),
+#    (3, 1000),
+#    (9 , 1000),
     (15 , 1000),
 ]
 
@@ -119,6 +119,7 @@ def run_task(task_type: TaskType, data_num: int):
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
+        continue
         if parameter[0] == 1:
             continue
 
