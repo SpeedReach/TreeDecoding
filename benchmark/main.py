@@ -49,6 +49,7 @@ def convert_human_eval_format(d):
     }
 
 def convert_qasper_format(d):
+    print(d['full_text'])
     full_text = json.loads(d['full_text'])
     doc = ""
     for paragraph in full_text["paragraphs"]:
