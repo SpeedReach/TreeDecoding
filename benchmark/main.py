@@ -100,9 +100,9 @@ def load_qasper() -> datasets.Dataset:
 # beams / max_tokens
 parameters = [
 #    (1 , 1000),
-#    (3, 1000),
+    (3, 1000),
 #    (9 , 1000),
-    (15 , 1000),
+#    (15 , 1000),
 ]
 
 
