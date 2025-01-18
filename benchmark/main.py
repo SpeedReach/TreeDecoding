@@ -49,7 +49,6 @@ def convert_human_eval_format(d):
     }
 
 def convert_qasper_format(d):
-    print(d['full_text'])
     full_text = json.loads(d['full_text'])
     doc = ""
     for paragraph in full_text["paragraphs"]:
@@ -95,6 +94,7 @@ def load_human_eval() -> datasets.Dataset:
 
 def load_qasper() -> datasets.Dataset:
     ds = load_dataset("allenai/qasper", split='train')
+    ds = ds.filter(lambda x: isinstance(x['full_text'], str))
     ds = ds.map(convert_qasper_format, batched=True)
     return ds
 
