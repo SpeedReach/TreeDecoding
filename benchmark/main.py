@@ -60,15 +60,12 @@ def convert_qasper_format(d):
             doc += "  "
         texts.append(doc)
     i = 0
-    remove = []
     for qas in d['qas']:
         answer = ""
         for ans in qas["answers"][0]["answer"]:
             answer = ans["free_form_answer"]
             if answer != "":
                 break
-        if answer == "":
-            remove.append(i)
         answers.append(answer)
     
         texts[i] = f"""
@@ -81,10 +78,6 @@ def convert_qasper_format(d):
     """
         i += 1
 
-    for index in sorted(remove, reverse=True):
-        del texts[index]
-        del answer[index]
-        
     return {
         'id': d['id'],
         'text': texts,
@@ -108,8 +101,19 @@ def load_human_eval() -> datasets.Dataset:
     )
     return ds
 
+def qasper_filter(d): 
+    qas = d["qas"]
+    answer = ""
+    for ans in qas["answers"][0]["answer"]:
+        answer = ans["free_form_answer"]
+        if answer != "":
+            break
+    return answer != ""
+
+
 def load_qasper() -> datasets.Dataset:
     ds = load_dataset("allenai/qasper", split='train')
+    ds = ds.filter( qasper_filter)
     print(ds)
     ds = ds.map(convert_qasper_format, batched=True)
     return ds
