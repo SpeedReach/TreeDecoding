@@ -38,7 +38,7 @@ def get_gpu_usage():
 
 class Metric:
 
-    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float,output_len: int, output: str):
+    def __init__(self, id: str,model_memory: int, time_taken: float, memory_usage: List[int], time_metric: List[float], score: float, input_len: int,output_len: int, output: str):
         self.model_memory = model_memory
         self.input_kv_memory = memory_usage[0]
         self.id = id
@@ -46,6 +46,7 @@ class Metric:
         self.memory_usage = memory_usage
         self.time_metric = time_metric
         self.score = score
+        self.input_len = input_len
         self.output_len = output_len
         self.output = output
 
@@ -58,6 +59,7 @@ class Metric:
             "memory_usage": self.memory_usage,
             "time_metric": self.time_metric,
             "score": self.score,
+            "input_len": self.input_len,
             "output_len": self.output_len,
             "output": self.output
         }
