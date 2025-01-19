@@ -67,6 +67,7 @@ def convert_qasper_format(d):
             if answer != "":
                 break
         answers.append(answer)
+        print("ans: ", answer)
     
         texts[i] = f"""
     Given the document, please answer the question.
