@@ -60,7 +60,17 @@ def convert_qasper_format(d):
             doc += "  "
         texts.append(doc)
     i = 0
+    remove = []
     for qas in d['qas']:
+        answer = ""
+        for ans in qas["answers"][0]["answer"]:
+            answer = ans["free_form_answer"]
+            if answer != "":
+                break
+        if answer == "":
+            remove.append(i)
+        answers.append(answer)
+    
         texts[i] = f"""
     Given the document, please answer the question.
     Doc:
@@ -69,15 +79,12 @@ def convert_qasper_format(d):
     Please answer the following question:
     {qas["question"][0]}
     """
-        answer = ""
-        for ans in qas["answers"][0]["answer"]:
-            answer = ans["free_form_answer"]
-            if answer != "":
-                break
-        if answer == "":
-            answer = "I don't know."
-        answers.append(answer)
         i += 1
+
+    for index in sorted(remove, reverse=True):
+        del texts[index]
+        del answer[index]
+        
     return {
         'id': d['id'],
         'text': texts,
