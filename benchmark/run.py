@@ -94,7 +94,6 @@ def run_bench_mark(
     
     for i in progress_bar:
         data = dataset[i]
-        print(data)
         if task_type == TaskType.SUM:
             if model_type == ModelType.LLAMA2:
                 prompt = f"""<s>[INST] <<SYS>>
@@ -141,15 +140,21 @@ You are a helpful assistant.<|end|>
         model_memory = get_gpu_usage()
 
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
-        if input_ids.shape[1] + max_new_tokens > 10000:
+        if input_ids.shape[1] + max_new_tokens > 6000:
             continue
 
         start = time.time()
-        if model_type == ModelType.LLAMA2:
-            output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens, [ model.config.eos_token_id ])
-        elif model_type == ModelType.PHI35:
-            output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
-        #print("shape",output.shape)
+        try:
+            if model_type == ModelType.LLAMA2:
+                output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens, [ model.config.eos_token_id ])
+            elif model_type == ModelType.PHI35:
+                output, memory_usage, time_metric = generate(model, tokenizer, prompt, num_beams, max_new_tokens,  [32007, 32001, 32000] )
+        except NotImplementedError:
+            #This version of huggingface may produce the exception
+            #Make sure that a `_reorder_cache` function is correctly implemented in transformers.models
+            #We ignore it for now, and hope it'll be fixed in the future
+            print("err")
+            continue
         completion = tokenizer.decode(output, skip_special_tokens=True)
         print(":", completion)
 

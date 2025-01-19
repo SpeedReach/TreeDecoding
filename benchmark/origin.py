@@ -13,7 +13,7 @@ def origin_generate(model, tokenizer, prompt, num_beams, max_new_tokens, eos_tok
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
 
-    outputs = model.generate(input_ids,do_sample=False, num_beams=num_beams, max_new_tokens=max_new_tokens, temperature=None, top_p = None, early_stopping=True)
+    outputs = model.generate(input_ids,do_sample=False, return_legacy_cache=False, num_beams=num_beams, max_new_tokens=max_new_tokens, temperature=None, top_p = None, early_stopping=True)
 
     return (outputs[0][input_ids.shape[-1]:], metrics.memory_metrics, metrics.time_metrics)
 

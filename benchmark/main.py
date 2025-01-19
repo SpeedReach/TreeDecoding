@@ -49,30 +49,38 @@ def convert_human_eval_format(d):
     }
 
 def convert_qasper_format(d):
-    full_text = json.loads(d['full_text'])
-    doc = ""
-    for paragraph in full_text["paragraphs"]:
-        doc += paragraph
-        doc += "\n"
-    qas = json.loads(d['qas'])
-    doc = f"""
-    Answer the question according to the following document, or answer "I don't know" if the document doesn't contain the answer.
+    texts = []
+    answers = []
+    for full_text in d['full_text']:
+        doc = ""
+        for paragraph in full_text["paragraphs"]:
+            for sentence in paragraph:
+                doc += sentence
+                doc += "\n"
+            doc += "  "
+        texts.append(doc)
+    i = 0
+    for qas in d['qas']:
+        texts[i] = f"""
+    Given the document, please answer the question.
     Doc:
-    {doc}
-    Question:
+    {texts[i]}
     {qas["question"][0]}
+    Please answer "I don't know." only, if the document doesn't contain the answer.
     """
-    answer = ""
-    for ans in qas["answers"][0]["answer"]:
-        answer = ans["free_form_answer"]
-        if answer != "":
-            break
-    if answer == "":
-        answer = "I don't know."
+        answer = ""
+        for ans in qas["answers"][0]["answer"]:
+            answer = ans["free_form_answer"]
+            if answer != "":
+                break
+        if answer == "":
+            answer = "I don't know."
+        answers.append(answer)
+        i += 1
     return {
         'id': d['id'],
-        'text': doc,
-        'answer': answer
+        'text': texts,
+        'answer': answers
     }
 
 def load_cnn_sum() -> datasets.Dataset:
@@ -94,15 +102,15 @@ def load_human_eval() -> datasets.Dataset:
 
 def load_qasper() -> datasets.Dataset:
     ds = load_dataset("allenai/qasper", split='train')
-    ds = ds.filter(lambda x: isinstance(x['full_text'], str))
+    print(ds)
     ds = ds.map(convert_qasper_format, batched=True)
     return ds
 
 # beams / max_tokens
 parameters = [
-#    (1 , 1000),
-    (3, 1000),
-#    (9 , 1000),
+    #(1 , 1000),
+    (9, 1000),
+    (3 , 1000),
 #    (15 , 1000),
 ]
 
@@ -120,6 +128,7 @@ def run_task(task_type: TaskType, data_num: int):
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
+        continue
         if parameter[0] == 1:
             continue
 
@@ -127,7 +136,7 @@ def run_task(task_type: TaskType, data_num: int):
         os.makedirs(path, exist_ok=True)
         print("processing tree ",parameter[0], "_",parameter[1] )
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), tree_generate, task_type, model_type, parameter[0], parameter[1])
+            metrics = run_bench_mark(model, tokenizer, ds.select(data_num), tree_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
 
@@ -138,12 +147,13 @@ def run_task(task_type: TaskType, data_num: int):
         os.makedirs(path, exist_ok=True)
         print("processing origin ",parameter[0], "_",parameter[1] )
         with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-            metrics = run_bench_mark(model, tokenizer, ds.select(range(data_num)), origin_generate, task_type, model_type, parameter[0], parameter[1])
+            metrics = run_bench_mark(model, tokenizer, ds.select(data_num), origin_generate, task_type, model_type, parameter[0], parameter[1])
             for metric in metrics:
                 out_file.write(json.dumps(metric.to_dict()) + "\n")
 
 
 
-run_task(TaskType.QASPER, 2)
+run_task(TaskType.QASPER, range(100))
 
 #run_task(TaskType.HUMAN_EVAL, 1)
+
