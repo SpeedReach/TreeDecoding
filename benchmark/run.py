@@ -144,7 +144,6 @@ You are a helpful assistant.<|end|>
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
         if input_ids.shape[1] + max_new_tokens > 6000:
             continue
-
         start = time.time()
         try:
             if model_type == ModelType.LLAMA2:
@@ -174,6 +173,7 @@ You are a helpful assistant.<|end|>
             memory_usage=memory_usage,
             time_metric=time_metric,
             score=score,
+            input_len=input_ids.shape[1],
             output_len=len(output),
             output=completion
         )

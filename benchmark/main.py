@@ -65,8 +65,9 @@ def convert_qasper_format(d):
     Given the document, please answer the question.
     Doc:
     {texts[i]}
+
+    Please answer the following question:
     {qas["question"][0]}
-    Please answer "I don't know." only, if the document doesn't contain the answer.
     """
         answer = ""
         for ans in qas["answers"][0]["answer"]:
@@ -108,10 +109,10 @@ def load_qasper() -> datasets.Dataset:
 
 # beams / max_tokens
 parameters = [
-    #(1 , 1000),
     (9, 1000),
     (3 , 1000),
-#    (15 , 1000),
+    (1, 1000)
+    #   (15 , 1000),
 ]
 
 
@@ -128,7 +129,6 @@ def run_task(task_type: TaskType, data_num: int):
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
-        continue
         if parameter[0] == 1:
             continue
 
@@ -155,5 +155,7 @@ def run_task(task_type: TaskType, data_num: int):
 
 run_task(TaskType.QASPER, range(100))
 
-#run_task(TaskType.HUMAN_EVAL, 1)
+#run_task(TaskType.HUMAN_EVAL,range( 164))
+
+#run_task(TaskType.SUM, range(200))
 
