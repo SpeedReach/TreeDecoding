@@ -12,6 +12,7 @@ class TaskType(Enum):
     SUM = 1
     HUMAN_EVAL = 2
     QASPER = 3
+    QSUM = 4
 
 class ModelType(Enum):
     LLAMA2 = 1
@@ -128,6 +129,12 @@ Complete the following function. No explaination is needed, output the code dire
 {data['text']}<|end|>
 <|assistant|>"""
         elif task_type == TaskType.QASPER:
+            if model_type == ModelType.PHI35:
+                prompt = f"""<|system|>
+You are a helpful assistant.<|end|>
+<|user|>{data['text']}<|end|>
+<|assistant|>"""
+        elif task_type == TaskType.QSUM:
             if model_type == ModelType.PHI35:
                 prompt = f"""<|system|>
 You are a helpful assistant.<|end|>

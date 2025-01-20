@@ -102,6 +102,26 @@ def load_human_eval() -> datasets.Dataset:
     )
     return ds
 
+
+def convert_qsum_format(d):
+    return {
+        'id': d['id'],
+        'text': d['input'],
+        'answer': d['output']
+    }
+
+def load_qsum() -> datasets.Dataset:
+    ds = load_dataset("pszemraj/qmsum-cleaned", split='train')
+    ds = ds.filter(qsum_filter)
+    ds = ds.map(convert_qsum_format, batched=True)
+    return ds
+
+
+
+def qsum_filter(d):
+    prompt = tokenizer(d['input'], return_tensors="pt").input_ids
+    return prompt.shape[1] < 5500
+
 def qasper_filter(d): 
     qas = d["qas"]
     answer = ""
@@ -137,6 +157,8 @@ def run_task(task_type: TaskType, data_num: int):
             ds = load_cnn_sum()
         case TaskType.QASPER:
             ds = load_qasper()
+        case TaskType.QSUM:
+            ds = load_qsum()
 
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
@@ -165,7 +187,7 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-run_task(TaskType.QASPER, range(100))
+run_task(TaskType.QSUM, range(100))
 
 #run_task(TaskType.HUMAN_EVAL,range( 164))
 
