@@ -8,7 +8,7 @@ from datasets import load_dataset
 import json
 
 
-from origin import origin_generate, origin_warmup
+from origin import origin_generate, origin_warmup, sequential_generate
 from tree_decoding import tree_generate, tree_warmup
 from run import run_bench_mark, TaskType, ModelType
 from transformers import logging
@@ -160,6 +160,18 @@ def run_task(task_type: TaskType, data_num: int):
         case TaskType.QSUM:
             ds = load_qsum()
 
+    origin_warmup(model, tokenizer, "This is a test", 3, 1000)
+
+    for parameter in parameters:
+        path = f"out/sequential/{task_type.name}"
+        os.makedirs(path, exist_ok=True)
+        print("processing sequential ",parameter[0], "_",parameter[1] )
+        with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
+            metrics = run_bench_mark(model, tokenizer, ds.select(data_num), sequential_generate, task_type, model_type, parameter[0], parameter[1])
+            for metric in metrics:
+                out_file.write(json.dumps(metric.to_dict()) + "\n")
+    return
+
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
     for parameter in parameters:
@@ -187,9 +199,9 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-run_task(TaskType.QSUM, range(100))
+#run_task(TaskType.QSUM, range(100))
 
-#run_task(TaskType.HUMAN_EVAL,range( 164))
+run_task(TaskType.HUMAN_EVAL,range( 164))
 
 #run_task(TaskType.SUM, range(200))
 
