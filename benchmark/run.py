@@ -167,7 +167,7 @@ You are a helpful assistant.<|end|>
         print(":", completion)
 
         score = 0
-        if task_type == TaskType.SUM or task_type == TaskType.QASPER:
+        if task_type == TaskType.SUM or task_type == TaskType.QASPER or task_type == TaskType.QSUM:
             rouge = rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
             score = rouge.score(completion, data['answer'])['rouge2'].fmeasure
         
