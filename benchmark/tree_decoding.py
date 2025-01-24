@@ -51,6 +51,10 @@ class SearchTree:
         self.beam_width: int = beam_width
 
 
+def cleanup_node(node: SearchNode):
+    node.token_id = None
+    node.token_score = None
+    node.acc_score = None
 
 def dfs(searchNode: SearchNode, targets: List[int], traversed: List[int]) -> Tuple[bool, List[int], List[int]]:
     # returns found, found path, unused nodes
@@ -148,6 +152,9 @@ def prune_kv_cache(past_key_values, input_length, remove_idx: List[int]):
         past_key_values.key_cache[i] = torch.index_select(past_key_values.key_cache[i], 2, keep_indices)
         past_key_values.value_cache[i] = torch.index_select(past_key_values.value_cache[i], 2, keep_indices)
 
+def clear_cache():
+    torch.cuda.empty_cache()
+    gpu_gc.collect()
 
 def prune_tree(searchTree: SearchTree, remove_idx: List[int]):
     for child in searchTree.root[:]:
@@ -161,6 +168,7 @@ def prune_tree(searchTree: SearchTree, remove_idx: List[int]):
             if child.idx in remove_idx:
                 #print("removed ", child.idx)
                 node.children.remove(child)
+                tmp.append(child)
             else:
                 tmp.append(child)
 
@@ -180,12 +188,16 @@ def prune_tree(searchTree: SearchTree, remove_idx: List[int]):
     searchTree.node_count = i
 
 def gc(searchTree: SearchTree,input_length, newest_branch: List[SearchNode], past_key_values):
-    unused = determine_unused_nodes(searchTree, [ node.idx for node in newest_branch])
+    ignored = newest_branch
+    unused = determine_unused_nodes(searchTree, [ node.idx for node in ignored])
     #print("Unused: ", len(unused[1]), len(unused[0]) + len(unused[1]) , unused)
     prune_tree(searchTree, unused[1])
     kv = prune_kv_cache(past_key_values,input_length, unused[1])
     #print_tree_state(searchTree, newest_branch)
     return 
+
+import torch
+import gc as gpu_gc
 
 @torch.no_grad()
 def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eos_token_id: List[int] = [32000]) -> Tuple[torch.Tensor, List[int]]:
@@ -221,13 +233,12 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
 
     need_gc = False
     for i in range(input_len, max_new_tokens+ input_len):
-        if  ((i % 5 == 0) or need_gc) and True:
+        if  ((i % 15 == 0) or need_gc) and True:
            # print("gcccc")
             need_gc = False
             gc(searchTree,input_len, newest_branch, past_key_values)
             idx = searchTree.node_count
         #print("gpu: ", get_gpu_usage())
-        gpu_usage.append(get_gpu_usage())
         position_ids = torch.tensor([[i for _ in range(beam_width)]], device=device)
         
         #construct attention_mask
@@ -248,7 +259,8 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
         beam_score = torch.tensor([b.acc_score for b in newest_branch], device=model.device)
         beam_score = beam_score.view((1, 1, beam_width, 1))
         token_scores = token_scores + beam_score
-        
+        token_scores = token_scores.clone()
+
         vocab_size = token_scores.shape[-1]
         token_scores = token_scores.view(beam_width * vocab_size)
         token_scores, tokens = torch.topk(
@@ -272,6 +284,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
             token_id = tokens[j]
             picked.append(token_id.item())
             searchNode = SearchNode(searchTree, idx, token_id=token_id, token_score = token_scores[j])
+
             
             #print(int(token_idx/beam_width)," add child")
             
@@ -282,6 +295,7 @@ def generate_next_tokens(model, input_ids, beam_width = 3, max_new_tokens=300,eo
                 completed_branches.append(searchNode)
                 searchNode.parent = newest_branch[next_indices[j]]
                 #tmp_newest_branch.append(searchNode)
+                searchNode.idx = -1
             else:
                 picked_scores.append(token_scores[j].item())
                 newest_branch[next_indices[j]].add_children(searchNode)

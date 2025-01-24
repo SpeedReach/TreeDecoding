@@ -120,7 +120,7 @@ def load_qsum() -> datasets.Dataset:
 
 def qsum_filter(d):
     prompt = tokenizer(d['input'], return_tensors="pt").input_ids
-    return prompt.shape[1] < 5500
+    return prompt.shape[1] < 5000
 
 def qasper_filter(d): 
     qas = d["qas"]
@@ -141,9 +141,10 @@ def load_qasper() -> datasets.Dataset:
 
 # beams / max_tokens
 parameters = [
-    (9, 1000),
-    (3 , 1000)
-    #   (15 , 1000),
+#    (1, 1000),
+#    (3, 1000),
+#    (9 , 1000),
+    (15 , 1000),
 ]
 
 
@@ -158,18 +159,6 @@ def run_task(task_type: TaskType, data_num: int):
             ds = load_qasper()
         case TaskType.QSUM:
             ds = load_qsum()
-
-    origin_warmup(model, tokenizer, "This is a test", 3, 1000)
-
-    for parameter in parameters:
-        path = f"out/sequential/{task_type.name}"
-        os.makedirs(path, exist_ok=True)
-        print("processing sequential ",parameter[0], "_",parameter[1] )
-        with open(f"{path}/{parameter[0]}_{parameter[1]}.jsonl", "w") as out_file:
-            metrics = run_bench_mark(model, tokenizer, ds.select(data_num), sequential_generate, task_type, model_type, parameter[0], parameter[1])
-            for metric in metrics:
-                out_file.write(json.dumps(metric.to_dict()) + "\n")
-    return
 
     tree_warmup(model, tokenizer, "This is a test", 3, 1000,  [ model.config.eos_token_id ])
 
@@ -198,9 +187,10 @@ def run_task(task_type: TaskType, data_num: int):
 
 
 
-#run_task(TaskType.QSUM, range(100))
-
-run_task(TaskType.HUMAN_EVAL,range( 164))
+#run_task(TaskType.HUMAN_EVAL,range(164))
 
 #run_task(TaskType.SUM, range(200))
+
+run_task(TaskType.QSUM, range(90))
+
 

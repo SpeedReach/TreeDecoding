@@ -164,14 +164,14 @@ You are a helpful assistant.<|end|>
             print("err")
             continue
         completion = tokenizer.decode(output, skip_special_tokens=True)
+        end = time.time()
         print(":", completion)
 
         score = 0
         if task_type == TaskType.SUM or task_type == TaskType.QASPER or task_type == TaskType.QSUM:
-            rouge = rouge_scorer.RougeScorer(['rouge2'], use_stemmer=True)
-            score = rouge.score(completion, data['answer'])['rouge2'].fmeasure
+            rouge = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+            score = rouge.score(completion, data['answer'])['rougeL'].fmeasure
         
-        end = time.time()
         
         metric = Metric(
             id=data['id'],
@@ -192,7 +192,7 @@ You are a helpful assistant.<|end|>
             'mem': f"{max(memory_usage) if memory_usage else 0:.2f}MB"
         })
 
-        
+        #del output        
     
     return metrics_list
 

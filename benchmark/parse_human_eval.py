@@ -1,8 +1,8 @@
 import os
 import json
 
-in_folder = "phi-human-out-2/tree/HUMAN_EVAL"
-out_folder = "phi-human-out-2/human_eval"
+in_folder = "out/tree/HUMAN_EVAL"
+out_folder = "out/human_eval"
 
 all_ids = set()
 for i in range(164):
